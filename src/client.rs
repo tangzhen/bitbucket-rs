@@ -1,20 +1,28 @@
-use crate::auth::Authorization;
+use crate::{auth::Authorization, models::BitbucketErrors, traits::AsyncRestClient};
 use anyhow::Result;
 use async_trait::async_trait;
-use reqwest::{Client, RequestBuilder};
-use serde::de::DeserializeOwned;
+use reqwest::{Client, RequestBuilder, Response};
+use serde::{de::DeserializeOwned, Deserialize};
 
-#[async_trait]
-pub trait RestClient {
-    fn uri(&self) -> &str;
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum ApiResult<R> {
+    Ok(R),
+    Err(BitbucketErrors),
+}
 
-    async fn get<T>(&self, uri: &str) -> Result<T>
-    where
-        T: DeserializeOwned;
+impl<R> ApiResult<R> {
+    pub fn to_result(self) -> Result<R> {
+        match self {
+            ApiResult::Ok(r) => Ok(r),
+            ApiResult::Err(e) => Err(anyhow::Error::new(e)),
+        }
+    }
+}
 
-    async fn post<T>(&self, uri: &str) -> Result<T>
-    where
-        T: DeserializeOwned;
+pub enum Scheme {
+    HTTP,
+    HTTPS,
 }
 
 #[derive(Debug, Builder)]
@@ -25,8 +33,13 @@ pub struct BitbucketClient {
 }
 
 #[inline]
-fn format_host_uri(host: &str) -> String {
-    format!("https://{}/rest/api/1.0", host)
+fn format_host_uri(host: &str, scheme: Scheme) -> String {
+    let scheme = match scheme {
+        Scheme::HTTP => "http",
+        Scheme::HTTPS => "https",
+    };
+
+    format!("{}://{}/rest/api/1.0", scheme, host)
 }
 
 impl Default for BitbucketClient {
@@ -40,9 +53,9 @@ impl Default for BitbucketClient {
 }
 
 impl BitbucketClient {
-    pub fn with_auth(host: &str, auth: Authorization) -> Self {
+    pub fn with_auth(host: &str, scheme: Scheme, auth: Authorization) -> Self {
         Self {
-            uri: format_host_uri(host),
+            uri: format_host_uri(host, scheme),
             auth: Some(auth),
             ..Default::default()
         }
@@ -50,15 +63,11 @@ impl BitbucketClient {
 }
 
 impl BitbucketClient {
-    pub fn new(host: &str) -> Self {
+    pub fn new(host: &str, scheme: Scheme) -> Self {
         Self {
-            uri: format_host_uri(host),
+            uri: format_host_uri(host, scheme),
             ..Default::default()
         }
-    }
-
-    pub fn uri(&self) -> &str {
-        &self.uri
     }
 
     pub fn auth(&self) -> &Option<Authorization> {
@@ -73,53 +82,50 @@ impl BitbucketClient {
             builder
         }
     }
+
+    async fn perform<F>(&self, method: F) -> Result<Response>
+        where
+            F: Fn() -> RequestBuilder,
+    {
+        let mut builder = method();
+        builder = self.maybe_add_auth(builder);
+        let resp = builder.send().await?;
+        Ok(resp)
+    }
 }
 
 #[async_trait]
-impl RestClient for BitbucketClient {
+impl AsyncRestClient for BitbucketClient {
     fn uri(&self) -> &str {
         &self.uri
     }
 
-    async fn get<T>(&self, uri: &str) -> Result<T>
-    where
-        T: DeserializeOwned,
+    async fn get_as<T>(&self, uri: &str) -> Result<T>
+        where
+            T: DeserializeOwned,
     {
-        let mut builder = self.http_client.get(uri);
-        builder = self.maybe_add_auth(builder);
-        let res = builder.send().await?.json().await?;
-        Ok(res)
+        self.get(uri)
+            .await?
+            .json::<ApiResult<T>>()
+            .await?
+            .to_result()
+    }
+
+    async fn get(&self, uri: &str) -> Result<Response> {
+        let resp = self.perform(|| self.http_client.get(uri)).await?;
+        println!("{:#?}", resp.text().await?);
+        self.perform(|| self.http_client.get(uri)).await
     }
 
     async fn post<T>(&self, uri: &str) -> Result<T>
-    where
-        T: DeserializeOwned,
+        where
+            T: DeserializeOwned,
     {
-        let mut builder = self.http_client.post(uri);
-        builder = self.maybe_add_auth(builder);
-        let res = builder.send().await?.json().await?;
+        let res = self
+            .perform(|| self.http_client.post(uri))
+            .await?
+            .json()
+            .await?;
         Ok(res)
-    }
-}
-
-mod tests {
-    use super::*;
-
-    #[test]
-    fn get_uri_should_work() {
-        let client = BitbucketClient::new("stash.test.com");
-        assert_eq!("https://stash.test.com/rest/api/1.0", client.uri());
-    }
-
-    #[test]
-    fn create_with_auth_should_work() {
-        let client =
-            BitbucketClient::with_auth("stash.test.com", Authorization::new("george", "test"));
-
-        assert!(client.auth().is_some());
-        assert_eq!(
-            *client.auth().as_ref().unwrap(),
-            Authorization::new("george", "test")
-        )
     }
 }

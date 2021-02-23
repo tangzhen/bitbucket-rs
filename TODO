@@ -1,0 +1,3 @@
+[ ] For every endpoint that supports query params, we should return a builder type for easily providing those
+[ ] Provide a simpler, blocking version of this library
+[ ] Create a nice builder structure in order to create the URIs. That way we can only unit test this and be safe and sure

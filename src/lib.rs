@@ -2,7 +2,8 @@
 extern crate derive_builder;
 extern crate async_trait;
 
-mod auth;
-mod client;
-mod models;
-mod resources;
+pub mod auth;
+pub mod client;
+pub mod models;
+pub mod resources;
+pub mod traits;
