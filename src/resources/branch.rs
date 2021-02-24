@@ -1,4 +1,4 @@
-use crate::{models::Branch, resources::util::*, traits::AsyncRestClient};
+use crate::{models::get::Branch, resources::util::*, traits::AsyncRestClient};
 use anyhow::Result;
 
 pub struct BranchResource<'client, C> {

@@ -1,7 +1,10 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use reqwest::Response;
-use serde::de::DeserializeOwned;
+use serde::{
+    Serialize,
+    de::DeserializeOwned,
+};
 
 #[async_trait]
 pub trait AsyncRestClient {
@@ -13,7 +16,8 @@ pub trait AsyncRestClient {
 
     async fn get(&self, uri: &str) -> Result<Response>;
 
-    async fn post<T>(&self, uri: &str) -> Result<T>
+    async fn post<T, P>(&self, uri: &str, payload: Option<P>) -> Result<T>
         where
-            T: DeserializeOwned;
+            T: DeserializeOwned,
+            P: Serialize + Send + Sync;
 }

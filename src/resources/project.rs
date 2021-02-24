@@ -1,7 +1,7 @@
 use anyhow::Result;
 use bytes::Bytes;
 
-use crate::{models::Project, resources::util::accumulate_pages, traits::AsyncRestClient};
+use crate::{models::{get, post}, resources::util::accumulate_pages, traits::AsyncRestClient};
 
 pub struct ProjectResource<'client, C> {
     client: &'client C,
@@ -21,14 +21,14 @@ impl<'client, C> ProjectResource<'client, C>
         &self.uri
     }
 
-    pub async fn get_all_projects(&self) -> Result<Vec<Project>> {
+    pub async fn get_all_projects(&self) -> Result<Vec<get::Project>> {
         accumulate_pages(&self.uri, |uri| {
             let uri = uri.to_owned();
             async move { self.client.get_as(&uri).await }
         }).await
     }
 
-    pub async fn get_project(&self, project: &str) -> Result<Project> {
+    pub async fn get_project(&self, project: &str) -> Result<get::Project> {
         let uri = self.uri_with_project(project);
         self.client.get_as(&uri).await
     }
@@ -37,6 +37,10 @@ impl<'client, C> ProjectResource<'client, C>
         let uri = format!("{}/avatar.png", self.uri_with_project(project));
         let bytes: Bytes = self.client.get(&uri).await?.bytes().await?;
         Ok(bytes)
+    }
+
+    pub async fn create_project(&self, project: &post::Project) -> Result<get::Project> {
+        self.client.post(&self.uri, Some(project)).await
     }
 
     #[inline]

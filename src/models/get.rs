@@ -6,7 +6,7 @@ pub struct BitbucketError {
     pub context: Option<String>,
     pub message: String,
     #[serde(rename(deserialize = "exceptionName"))]
-    pub exception_name: String,
+    pub exception_name: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]

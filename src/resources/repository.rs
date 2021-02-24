@@ -1,4 +1,4 @@
-use crate::{models::{Repository, Tag}, resources::util::*, traits::AsyncRestClient};
+use crate::{models::get::{Repository, Tag}, resources::util::*, traits::AsyncRestClient};
 use anyhow::Result;
 
 pub struct RepositoryResource<'client, C> {

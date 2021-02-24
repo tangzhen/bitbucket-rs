@@ -1,6 +1,6 @@
 use crate::traits::AsyncRestClient;
 use anyhow::Result;
-use crate::models::{PullRequest, PullRequestState};
+use crate::models::get::{PullRequest, PullRequestState};
 use crate::resources::util::accumulate_pages;
 
 pub struct PullRequestResource<'client, C> {

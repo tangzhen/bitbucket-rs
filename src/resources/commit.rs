@@ -1,4 +1,4 @@
-use crate::{models::Commit, resources::util::*, traits::AsyncRestClient};
+use crate::{models::get::Commit, resources::util::*, traits::AsyncRestClient};
 use anyhow::Result;
 
 pub struct CommitResource<'client, C> {

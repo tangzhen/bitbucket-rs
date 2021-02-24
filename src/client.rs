@@ -1,8 +1,8 @@
-use crate::{auth::Authorization, models::BitbucketErrors, traits::AsyncRestClient};
+use crate::{auth::Authorization, models::get::BitbucketErrors, traits::AsyncRestClient};
 use anyhow::Result;
 use async_trait::async_trait;
 use reqwest::{Client, RequestBuilder, Response};
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
@@ -117,12 +117,19 @@ impl AsyncRestClient for BitbucketClient {
         self.perform(|| self.http_client.get(uri)).await
     }
 
-    async fn post<T>(&self, uri: &str) -> Result<T>
+    async fn post<T, P>(&self, uri: &str, payload: Option<P>) -> Result<T>
         where
             T: DeserializeOwned,
+            P: Serialize + Send + Sync,
     {
         let res = self
-            .perform(|| self.http_client.post(uri))
+            .perform(|| {
+                let mut builder = self.http_client.post(uri);
+                if let Some(payload) = &payload {
+                    builder = builder.json(payload);
+                }
+                builder
+            })
             .await?
             .json()
             .await?;
