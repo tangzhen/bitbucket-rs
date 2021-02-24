@@ -43,6 +43,14 @@ impl<'client, C> ProjectResource<'client, C>
         self.client.post(&self.uri, Some(project)).await
     }
 
+    pub async fn update_project(&self, project: &str, payload: &post::Project) -> Result<get::Project> {
+        self.client.put(&self.uri_with_project(project), Some(payload)).await
+    }
+
+    pub async fn delete_project(&self, project: &str) -> Result<()> {
+        self.client.delete(&self.uri_with_project(project)).await
+    }
+
     #[inline]
     fn uri_with_project(&self, project: &str) -> String {
         format!("{}/{}", self.uri, project)

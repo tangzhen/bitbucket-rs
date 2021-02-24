@@ -1,8 +1,8 @@
-use crate::{auth::Authorization, models::get::BitbucketErrors, traits::AsyncRestClient};
+use crate::{auth::Authorization, models::get::BitbucketErrors, traits::{AsyncRestClient, Payload}};
 use anyhow::Result;
 use async_trait::async_trait;
 use reqwest::{Client, RequestBuilder, Response};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize};
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
@@ -83,6 +83,18 @@ impl BitbucketClient {
         }
     }
 
+    #[inline]
+    fn maybe_add_payload<P>(&self, builder: RequestBuilder, payload: Option<&P>) -> RequestBuilder
+        where
+            P: Payload
+    {
+        if let Some(payload) = payload {
+            builder.json(payload)
+        } else {
+            builder
+        }
+    }
+
     async fn perform<F>(&self, method: F) -> Result<Response>
         where
             F: Fn() -> RequestBuilder,
@@ -92,6 +104,18 @@ impl BitbucketClient {
         let resp = builder.send().await?;
         Ok(resp)
     }
+
+    async fn perform_as<T, F>(&self, method: F) -> Result<T>
+        where
+            F: Fn() -> RequestBuilder,
+            T: DeserializeOwned
+    {
+        self.perform(method)
+            .await?
+            .json::<ApiResult<T>>()
+            .await?
+            .to_result()
+    }
 }
 
 #[async_trait]
@@ -100,39 +124,49 @@ impl AsyncRestClient for BitbucketClient {
         &self.uri
     }
 
+    async fn get(&self, uri: &str) -> Result<Response> {
+        self.perform(|| self.http_client.get(uri)).await
+    }
+
     async fn get_as<T>(&self, uri: &str) -> Result<T>
         where
             T: DeserializeOwned,
     {
-        self.get(uri)
-            .await?
-            .json::<ApiResult<T>>()
-            .await?
-            .to_result()
-    }
-
-    async fn get(&self, uri: &str) -> Result<Response> {
-        let resp = self.perform(|| self.http_client.get(uri)).await?;
-        println!("{:#?}", resp.text().await?);
-        self.perform(|| self.http_client.get(uri)).await
+        self.perform_as(|| self.http_client.get(uri)).await
     }
 
     async fn post<T, P>(&self, uri: &str, payload: Option<P>) -> Result<T>
         where
             T: DeserializeOwned,
-            P: Serialize + Send + Sync,
+            P: Payload,
     {
-        let res = self
-            .perform(|| {
-                let mut builder = self.http_client.post(uri);
-                if let Some(payload) = &payload {
-                    builder = builder.json(payload);
-                }
-                builder
-            })
-            .await?
-            .json()
-            .await?;
-        Ok(res)
+        self.perform_as(|| {
+            let builder = self.http_client.post(uri);
+            self.maybe_add_payload(builder, payload.as_ref())
+        }).await
+    }
+
+    async fn put<T, P>(&self, uri: &str, payload: Option<P>) -> Result<T>
+        where
+            T: DeserializeOwned,
+            P: Payload
+    {
+        self.perform_as(|| {
+            let builder = self.http_client.put(uri);
+            self.maybe_add_payload(builder, payload.as_ref())
+        }).await
+    }
+
+    async fn delete(&self, uri: &str) -> Result<()> {
+        let resp = self.perform(|| self.http_client.delete(uri)).await?;
+        let status = resp.status();
+        let is_error = status.is_client_error() || status.is_server_error();
+
+        if !is_error {
+            Ok(())
+        } else {
+            let errors: BitbucketErrors = resp.json().await?;
+            Err(anyhow::Error::new(errors))
+        }
     }
 }
