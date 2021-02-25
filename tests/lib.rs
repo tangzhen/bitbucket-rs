@@ -1,5 +1,6 @@
 extern crate httpmock;
 extern crate serde_json;
 
-mod resource_tests;
+#[macro_use]
 mod common;
+mod resource_tests;

@@ -1,7 +1,6 @@
 use crate::common;
 use httpmock::{MockServer, Method::{GET, POST, PUT, DELETE}};
 use bitbucket_rs::{
-    resources::ProjectResource,
     models::{
         get::BitbucketErrors,
         post,
@@ -11,9 +10,7 @@ use serde_json::json;
 
 #[tokio::test]
 async fn get_existing_project_works() -> common::Result {
-    let server = MockServer::start_async().await;
-    let client = common::make_client(&server);
-    let resource = ProjectResource::new(&client);
+    let ctx = context!(ProjectResource);
     let project = "test_project";
 
     let json_project = r#"
@@ -34,10 +31,9 @@ async fn get_existing_project_works() -> common::Result {
     }"#;
 
     let expected_project = serde_json::from_str(json_project)?;
+    let path = format!("projects/{}", &project);
 
-    server.mock(|when, then| {
-        let path = format!("projects/{}", &project);
-
+    ctx.server().mock(|when, then| {
         when.method(GET)
             .path(common::format_path(&path));
         then.status(200)
@@ -45,7 +41,7 @@ async fn get_existing_project_works() -> common::Result {
             .body(json_project);
     });
 
-    let project = resource.get_project(&project).await?;
+    let project = ctx.resource().get_project(&project).await?;
     assert_eq!(project, expected_project);
 
     Ok(())
@@ -53,9 +49,7 @@ async fn get_existing_project_works() -> common::Result {
 
 #[tokio::test]
 async fn get_all_projects_works() -> common::Result {
-    let server = MockServer::start_async().await;
-    let client = common::make_client(&server);
-    let resource = ProjectResource::new(&client);
+    let ctx = context!(ProjectResource);
 
     let json_first_project = r#"
     {
@@ -113,7 +107,7 @@ async fn get_all_projects_works() -> common::Result {
 
     let path = common::format_path("projects");
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(GET)
             .path(&path)
             .query_param_exists("start");
@@ -121,7 +115,7 @@ async fn get_all_projects_works() -> common::Result {
             .body(json_second_page);
     });
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(GET)
             .path(&path);
         then.status(200)
@@ -131,7 +125,7 @@ async fn get_all_projects_works() -> common::Result {
     let expected_first_project = serde_json::from_str(&json_first_project)?;
     let expected_second_project = serde_json::from_str(&json_second_project)?;
 
-    let projects = resource.get_all_projects().await?;
+    let projects = ctx.resource().get_all_projects().await?;
 
     assert_eq!(projects[0], expected_first_project);
     assert_eq!(projects[1], expected_second_project);
@@ -141,9 +135,7 @@ async fn get_all_projects_works() -> common::Result {
 
 #[tokio::test]
 async fn create_project_works() -> common::Result {
-    let server = MockServer::start_async().await;
-    let client = common::make_client(&server);
-    let resource = ProjectResource::new(&client);
+    let ctx = context!(ProjectResource);
 
     let project = post::Project {
         key: "PTP".to_owned(),
@@ -169,7 +161,7 @@ async fn create_project_works() -> common::Result {
         }
     }"#;
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(POST)
             .path(common::format_path("projects"));
         then.status(201)
@@ -177,7 +169,7 @@ async fn create_project_works() -> common::Result {
     });
 
     let expected_project = serde_json::from_str(expected_json_project)?;
-    let new_project = resource.create_project(&project).await?;
+    let new_project = ctx.resource().create_project(&project).await?;
 
     assert_eq!(new_project, expected_project);
 
@@ -186,9 +178,7 @@ async fn create_project_works() -> common::Result {
 
 #[tokio::test]
 async fn get_non_existent_project_returns_error() -> common::Result {
-    let server = MockServer::start_async().await;
-    let client = common::make_client(&server);
-    let resource = ProjectResource::new(&client);
+    let ctx = context!(ProjectResource);
 
     let json_errors = r#"
     {
@@ -202,7 +192,7 @@ async fn get_non_existent_project_returns_error() -> common::Result {
     }
     "#;
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(GET)
             .path(common::format_path("projects/non_existent"));
         then.status(404)
@@ -210,7 +200,7 @@ async fn get_non_existent_project_returns_error() -> common::Result {
     });
 
     let expected_errors: BitbucketErrors = serde_json::from_str(json_errors)?;
-    let resp = resource.get_project("non_existent").await;
+    let resp = ctx.resource().get_project("non_existent").await;
     assert!(resp.is_err());
 
     let errors = resp.as_ref()
@@ -225,9 +215,7 @@ async fn get_non_existent_project_returns_error() -> common::Result {
 
 #[tokio::test]
 async fn update_project_works() -> common::Result {
-    let server = MockServer::start_async().await;
-    let client = common::make_client(&server);
-    let resource = ProjectResource::new(&client);
+    let ctx = context!(ProjectResource);
     let project = "test";
     let path = common::format_path(&format!("projects/{}", project));
 
@@ -251,7 +239,7 @@ async fn update_project_works() -> common::Result {
     let existing_json_project = json_project.to_string();
     let existing_expected_project = serde_json::from_str(&existing_json_project)?;
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(GET)
             .path(&path);
         then.status(200)
@@ -262,14 +250,14 @@ async fn update_project_works() -> common::Result {
     let updated_json_project = json_project.to_string();
     let updated_expected_project = serde_json::from_str(&updated_json_project)?;
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(PUT)
             .path(&path);
         then.status(200)
             .body(updated_json_project);
     });
 
-    let existing_project = resource.get_project(project).await?;
+    let existing_project = ctx.resource().get_project(project).await?;
     assert_eq!(existing_project, existing_expected_project);
 
     let new_project = post::Project {
@@ -279,7 +267,7 @@ async fn update_project_works() -> common::Result {
         avatar: None,
     };
 
-    let updated_project = resource.update_project(project, &new_project).await?;
+    let updated_project = ctx.resource().update_project(project, &new_project).await?;
     assert_eq!(updated_project, updated_expected_project);
 
     Ok(())
@@ -287,18 +275,15 @@ async fn update_project_works() -> common::Result {
 
 #[tokio::test]
 async fn delete_project_works() -> common::Result {
-    let server = MockServer::start_async().await;
-    let client = common::make_client(&server);
-    let resource = ProjectResource::new(&client);
+    let ctx = context!(ProjectResource);
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(DELETE)
             .path(common::format_path("projects/test"));
         then.status(204);
     });
 
-    let res = resource.delete_project("test").await;
-    println!("{:#?}", res);
+    let res = ctx.resource().delete_project("test").await;
     assert!(res.is_ok());
 
     Ok(())
@@ -306,9 +291,7 @@ async fn delete_project_works() -> common::Result {
 
 #[tokio::test]
 async fn failed_to_delete_returns_error() -> common::Result {
-    let server = MockServer::start_async().await;
-    let client = common::make_client(&server);
-    let resource = ProjectResource::new(&client);
+    let ctx = context!(ProjectResource);
 
     let errors = r#"
     {
@@ -322,7 +305,7 @@ async fn failed_to_delete_returns_error() -> common::Result {
     }
     "#;
 
-    server.mock(|when, then| {
+    ctx.server().mock(|when, then| {
         when.method(DELETE)
             .path(common::format_path("projects/test"));
         then.status(401)
@@ -330,7 +313,7 @@ async fn failed_to_delete_returns_error() -> common::Result {
     });
 
     let expected_errors = serde_json::from_str(errors)?;
-    let resp = resource.delete_project("test").await;
+    let resp = ctx.resource().delete_project("test").await;
     assert!(resp.is_err());
 
     let errors = resp
