@@ -7,3 +7,4 @@ pub mod client;
 pub mod resources;
 pub mod traits;
 pub mod models;
+pub mod uri_builders;
