@@ -1,42 +1,36 @@
 use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, RepositoryResourceUriBuilder};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProjectResourceUriBuilder<'r> {
     builder: ResourceUriBuilder<'r>,
-    project: Option<&'r str>,
 }
 
 impl<'r> ProjectResourceUriBuilder<'r> {
     pub fn new(builder: ResourceUriBuilder<'r>) -> Self {
-        Self { builder, project: None }
+        Self { builder }
     }
 
-    pub fn project(mut self, project: &'r str) -> WithProjectResourceUriBuilder<'r> {
-        self.project = Some(project);
-        WithProjectResourceUriBuilder::new(self)
+    pub fn project(self, project: &'r str) -> WithProjectResourceUriBuilder<'r> {
+        WithProjectResourceUriBuilder::new(self, project)
     }
 }
 
 impl<'r> UriBuilder for ProjectResourceUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/projects", self.builder.build()?);
-        let uri = match &self.project {
-            None => uri,
-            Some(project) => format!("{}/{}", uri, project)
-        };
-
         Ok(uri)
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WithProjectResourceUriBuilder<'r> {
-    builder: ProjectResourceUriBuilder<'r>
+    builder: ProjectResourceUriBuilder<'r>,
+    project: &'r str,
 }
 
 impl<'r> WithProjectResourceUriBuilder<'r> {
-    pub fn new(builder: ProjectResourceUriBuilder<'r>) -> Self {
-        Self { builder }
+    pub fn new(builder: ProjectResourceUriBuilder<'r>, project: &'r str) -> Self {
+        Self { builder, project }
     }
 
     pub fn avatar(self) -> ProjectAvatarResourceUriBuilder<'r> {
@@ -50,11 +44,12 @@ impl<'r> WithProjectResourceUriBuilder<'r> {
 
 impl<'r> UriBuilder for WithProjectResourceUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        Ok(self.builder.build()?)
+        let uri = format!("{}/{}", self.builder.build()?, self.project);
+        Ok(uri)
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProjectAvatarResourceUriBuilder<'r> {
     builder: WithProjectResourceUriBuilder<'r>
 }
@@ -74,13 +69,17 @@ impl<'r> UriBuilder for ProjectAvatarResourceUriBuilder<'r> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::tests::TEST_HOST;
+    use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT};
+
+    fn base_uri() -> String {
+        format!("{}/projects", crate::uri_builders::tests::base_uri())
+    }
 
     #[test]
     fn project_resource_uri_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).projects().build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/projects");
+        assert_eq!(uri.unwrap(), base_uri());
     }
 
     #[test]
@@ -88,11 +87,11 @@ mod tests {
         let uri = ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()
-            .project("TEST")
+            .project(TEST_PROJECT)
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/projects/TEST")
+        assert_eq!(uri.unwrap(), format!("{}/{}", base_uri(), TEST_PROJECT));
     }
 
     #[test]
@@ -100,11 +99,11 @@ mod tests {
         let uri = ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()
-            .project("TEST")
+            .project(TEST_PROJECT)
             .avatar()
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/projects/TEST/avatar.png");
+        assert_eq!(uri.unwrap(), format!("{}/{}/avatar.png", base_uri(), TEST_PROJECT));
     }
 }

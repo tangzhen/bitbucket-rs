@@ -1,6 +1,6 @@
 use crate::uri_builders::{UriBuilder, BuildResult, REST_API_URI, AdminResourceUriBuilder, ProjectResourceUriBuilder};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ResourceUriBuilder<'r> {
     host: Option<&'r str>,
 }
@@ -30,7 +30,7 @@ impl<'r> UriBuilder for ResourceUriBuilder<'r> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::tests::TEST_HOST;
+    use crate::uri_builders::tests::{TEST_HOST, base_uri};
 
     #[test]
     fn resource_uri_builder_requires_host() {
@@ -43,6 +43,6 @@ mod tests {
     fn resource_uri_builder_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0");
+        assert_eq!(uri.unwrap(), base_uri());
     }
 }

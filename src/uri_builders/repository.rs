@@ -1,37 +1,30 @@
-use crate::uri_builders::{WithProjectResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
+use crate::uri_builders::{WithProjectResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchResourceUriBuilder, CommitResourceUriBuilder};
 use serde::Serialize;
 use serde_plain;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RepositoryResourceUriBuilder<'r> {
     builder: WithProjectResourceUriBuilder<'r>,
-    repo: Option<&'r str>,
 }
 
 impl<'r> RepositoryResourceUriBuilder<'r> {
     pub fn new(builder: WithProjectResourceUriBuilder<'r>) -> Self {
-        Self { builder, repo: None }
+        Self { builder }
     }
 
-    pub fn repository(mut self, repo: &'r str) -> WithRepositoryResourceUriBuilder<'r> {
-        self.repo = Some(repo);
-        WithRepositoryResourceUriBuilder::new(self)
+    pub fn repository(self, repo: &'r str) -> WithRepositoryResourceUriBuilder<'r> {
+        WithRepositoryResourceUriBuilder::new(self, repo)
     }
 }
 
 impl<'r> UriBuilder for RepositoryResourceUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/repos", self.builder.build()?);
-        let uri = match &self.repo {
-            None => uri,
-            Some(repo) => format!("{}/{}", uri, repo)
-        };
-
         Ok(uri)
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "kebab-case")]
 enum RepositoryAction {
     Forks,
@@ -49,14 +42,16 @@ enum RepositoryAction {
     Tags,
 }
 
+#[derive(Debug, Clone)]
 pub struct WithRepositoryResourceUriBuilder<'r> {
     builder: RepositoryResourceUriBuilder<'r>,
+    repo: &'r str,
     action: Option<RepositoryAction>,
 }
 
 impl<'r> WithRepositoryResourceUriBuilder<'r> {
-    pub fn new(builder: RepositoryResourceUriBuilder<'r>) -> Self {
-        Self { builder, action: None }
+    pub fn new(builder: RepositoryResourceUriBuilder<'r>, repo: &'r str) -> Self {
+        Self { builder, repo, action: None }
     }
 
     pub fn forks(mut self) -> TerminalUriBuilder<Self> {
@@ -74,10 +69,9 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
         TerminalUriBuilder::new(self)
     }
 
-    // TODO: This needs another type
-    pub fn branches(mut self) -> TerminalUriBuilder<Self> {
+    pub fn branches(mut self) -> BranchResourceUriBuilder<'r> {
         self.action = Some(RepositoryAction::Branches);
-        TerminalUriBuilder::new(self)
+        BranchResourceUriBuilder::new(self)
     }
 
     // TODO: This needs another type
@@ -91,10 +85,9 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
         TerminalUriBuilder::new(self)
     }
 
-    // TODO: This needs another type
-    pub fn commits(mut self) -> TerminalUriBuilder<Self> {
+    pub fn commits(mut self) -> CommitResourceUriBuilder<'r> {
         self.action = Some(RepositoryAction::Commits);
-        TerminalUriBuilder::new(self)
+        CommitResourceUriBuilder::new(self)
     }
 
     // TODO: This needs another type
@@ -135,11 +128,11 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
 
 impl<'r> UriBuilder for WithRepositoryResourceUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
+        let uri = format!("{}/{}", self.builder.build()?, self.repo);
         let uri = match &self.action {
             None => uri,
             Some(action) => {
-                let action = serde_plain::to_string(&action).unwrap();
+                let action = serde_plain::to_string(action).unwrap();
                 format!("{}/{}", uri, action)
             }
         };
@@ -152,18 +145,22 @@ impl<'r> UriBuilder for WithRepositoryResourceUriBuilder<'r> {
 mod tests {
     use super::*;
     use crate::uri_builders::ResourceUriBuilder;
-    use crate::uri_builders::tests::TEST_HOST;
+    use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT};
+
+    fn base_uri() -> String {
+        format!("{}/projects/{}/repos", crate::uri_builders::tests::base_uri(), TEST_PROJECT)
+    }
 
     #[test]
     fn repository_resource_uri_works() {
         let uri = ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()
-            .project("TEST")
+            .project(TEST_PROJECT)
             .repos()
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/projects/TEST/repos");
+        assert_eq!(uri.unwrap(), base_uri());
     }
 }

@@ -2,74 +2,63 @@ use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, TerminalU
 use serde::Serialize;
 use serde_plain;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+enum AdminAction {
+    Groups,
+    Users,
+    Cluster,
+    Licence,
+}
+
+#[derive(Debug, Clone)]
 pub struct AdminResourceUriBuilder<'r> {
-    builder: ResourceUriBuilder<'r>
+    builder: ResourceUriBuilder<'r>,
+    action: Option<AdminAction>,
 }
 
 impl<'r> AdminResourceUriBuilder<'r> {
     pub fn new(builder: ResourceUriBuilder<'r>) -> Self {
-        Self { builder }
+        Self { builder, action: None }
     }
 
-    pub fn groups(self) -> AdminGroupResourceUriBuilder<'r> {
+    pub fn groups(mut self) -> AdminGroupResourceUriBuilder<'r> {
+        self.action = Some(AdminAction::Groups);
         AdminGroupResourceUriBuilder::new(self)
     }
 
-    pub fn users(self) -> AdminUserResourceUriBuilder<'r> {
+    pub fn users(mut self) -> AdminUserResourceUriBuilder<'r> {
+        self.action = Some(AdminAction::Users);
         AdminUserResourceUriBuilder::new(self)
     }
 
-    pub fn cluster(self) -> AdminClusterResourceUriBuilder<'r> {
-        AdminClusterResourceUriBuilder::new(self)
+    pub fn cluster(mut self) -> TerminalUriBuilder<Self> {
+        self.action = Some(AdminAction::Cluster);
+        TerminalUriBuilder::new(self)
     }
 
-    pub fn licence(self) -> AdminLicenceResourceUriBuilder<'r> {
-        AdminLicenceResourceUriBuilder::new(self)
+    pub fn licence(mut self) -> TerminalUriBuilder<Self> {
+        self.action = Some(AdminAction::Licence);
+        TerminalUriBuilder::new(self)
     }
 }
 
 impl<'r> UriBuilder for AdminResourceUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        Ok(format!("{}/admin", self.builder.build()?))
+        let uri = format!("{}/admin", self.builder.build()?);
+        let uri = match &self.action {
+            None => uri,
+            Some(action) => {
+                let action = serde_plain::to_string(&action).unwrap();
+                format!("{}/{}", uri, action)
+            }
+        };
+
+        Ok(uri)
     }
 }
 
-#[derive(Debug)]
-pub struct AdminClusterResourceUriBuilder<'r> {
-    builder: AdminResourceUriBuilder<'r>,
-}
-
-impl<'r> AdminClusterResourceUriBuilder<'r> {
-    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
-        Self { builder }
-    }
-}
-
-impl<'r> UriBuilder for AdminClusterResourceUriBuilder<'r> {
-    fn build(&self) -> BuildResult {
-        Ok(format!("{}/cluster", self.builder.build()?))
-    }
-}
-
-#[derive(Debug)]
-pub struct AdminLicenceResourceUriBuilder<'r> {
-    builder: AdminResourceUriBuilder<'r>,
-}
-
-impl<'r> AdminLicenceResourceUriBuilder<'r> {
-    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
-        Self { builder }
-    }
-}
-
-impl<'r> UriBuilder for AdminLicenceResourceUriBuilder<'r> {
-    fn build(&self) -> BuildResult {
-        Ok(format!("{}/licence", self.builder.build()?))
-    }
-}
-
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "kebab-case")]
 enum AdminGroupAction {
     AddUser,
@@ -79,7 +68,7 @@ enum AdminGroupAction {
     RemoveUser,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AdminGroupResourceUriBuilder<'r> {
     builder: AdminResourceUriBuilder<'r>,
     action: Option<AdminGroupAction>,
@@ -118,7 +107,7 @@ impl<'r> AdminGroupResourceUriBuilder<'r> {
 
 impl<'r> UriBuilder for AdminGroupResourceUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = format!("{}/groups", self.builder.build()?);
+        let uri = self.builder.build()?;
         let uri = match &self.action {
             None => uri,
             Some(action) => {
@@ -131,7 +120,7 @@ impl<'r> UriBuilder for AdminGroupResourceUriBuilder<'r> {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "kebab-case")]
 enum AdminUserAction {
     AddGroup,
@@ -144,7 +133,7 @@ enum AdminUserAction {
     Rename,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AdminUserResourceUriBuilder<'r> {
     builder: AdminResourceUriBuilder<'r>,
     action: Option<AdminUserAction>,
@@ -198,7 +187,7 @@ impl<'r> AdminUserResourceUriBuilder<'r> {
 
 impl<'r> UriBuilder for AdminUserResourceUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = format!("{}/users", self.builder.build()?);
+        let uri = self.builder.build()?;
         let uri = match &self.action {
             None => uri,
             Some(action) => {
@@ -217,32 +206,36 @@ mod tests {
     use super::*;
     use crate::uri_builders::tests::TEST_HOST;
 
+    fn base_uri() -> String {
+        format!("{}/admin", crate::uri_builders::tests::base_uri())
+    }
+
     #[test]
     fn admin_resource_uri_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin");
+        assert_eq!(uri.unwrap(), base_uri());
     }
 
     #[test]
     fn admin_cluster_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().cluster().build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/cluster");
+        assert_eq!(uri.unwrap(), format!("{}/cluster", base_uri()));
     }
 
     #[test]
     fn admin_licence_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().licence().build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/licence");
+        assert_eq!(uri.unwrap(), format!("{}/licence", base_uri()));
     }
 
     #[test]
     fn admin_groups_resource_uri_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().groups().build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/groups");
+        assert_eq!(uri.unwrap(), format!("{}/groups", base_uri()));
     }
 
     #[test]
@@ -254,7 +247,7 @@ mod tests {
             .add_user()
             .build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/groups/add-user");
+        assert_eq!(uri.unwrap(), format!("{}/groups/add-user", base_uri()));
     }
 
     #[test]
@@ -266,7 +259,7 @@ mod tests {
             .add_users()
             .build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/groups/add-users");
+        assert_eq!(uri.unwrap(), format!("{}/groups/add-users", base_uri()));
     }
 
     #[test]
@@ -278,7 +271,7 @@ mod tests {
             .more_members()
             .build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/groups/more-members");
+        assert_eq!(uri.unwrap(), format!("{}/groups/more-members", base_uri()));
     }
 
     #[test]
@@ -290,7 +283,7 @@ mod tests {
             .more_non_members()
             .build();
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/groups/more-non-members");
+        assert_eq!(uri.unwrap(), format!("{}/groups/more-non-members", base_uri()));
     }
 
     #[test]
@@ -302,7 +295,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users");
+        assert_eq!(uri.unwrap(), format!("{}/users", base_uri()));
     }
 
     #[test]
@@ -315,7 +308,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/add-group");
+        assert_eq!(uri.unwrap(), format!("{}/users/add-group", base_uri()));
     }
 
     #[test]
@@ -328,7 +321,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/add-groups");
+        assert_eq!(uri.unwrap(), format!("{}/users/add-groups", base_uri()));
     }
 
     #[test]
@@ -341,7 +334,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/captcha");
+        assert_eq!(uri.unwrap(), format!("{}/users/captcha", base_uri()));
     }
 
     #[test]
@@ -354,7 +347,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/credentials");
+        assert_eq!(uri.unwrap(), format!("{}/users/credentials", base_uri()));
     }
 
     #[test]
@@ -367,7 +360,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/more-members");
+        assert_eq!(uri.unwrap(), format!("{}/users/more-members", base_uri()));
     }
 
     #[test]
@@ -380,7 +373,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/more-non-members");
+        assert_eq!(uri.unwrap(), format!("{}/users/more-non-members", base_uri()));
     }
 
     #[test]
@@ -393,7 +386,7 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/remove-group");
+        assert_eq!(uri.unwrap(), format!("{}/users/remove-group", base_uri()));
     }
 
     #[test]
@@ -406,6 +399,6 @@ mod tests {
             .build();
 
         assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), "http://stash.test.com/rest/api/1.0/admin/users/rename");
+        assert_eq!(uri.unwrap(), format!("{}/users/rename", base_uri()));
     }
 }
