@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 
-use bitbucket_rs::client::{BitbucketClient, Scheme};
+use bitbucket_rs::client::BitbucketClient;
 use httpmock::MockServer;
+use bitbucket_rs::Scheme;
 
 pub type Result = anyhow::Result<()>;
 

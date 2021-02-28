@@ -1,4 +1,4 @@
-use crate::{auth::Authorization, models::get::BitbucketErrors, traits::{AsyncRestClient, Payload}};
+use crate::{auth::Authorization, models::get::BitbucketErrors, traits::{AsyncRestClient, Payload}, Scheme};
 use anyhow::Result;
 use async_trait::async_trait;
 use reqwest::{Client, RequestBuilder, Response};
@@ -20,33 +20,21 @@ impl<R> ApiResult<R> {
     }
 }
 
-pub enum Scheme {
-    HTTP,
-    HTTPS,
-}
 
 #[derive(Debug, Builder)]
 pub struct BitbucketClient {
     http_client: Client,
-    uri: String,
+    host: String,
+    scheme: Scheme,
     auth: Option<Authorization>,
-}
-
-#[inline]
-fn format_host_uri(host: &str, scheme: Scheme) -> String {
-    let scheme = match scheme {
-        Scheme::HTTP => "http",
-        Scheme::HTTPS => "https",
-    };
-
-    format!("{}://{}/rest/api/1.0", scheme, host)
 }
 
 impl Default for BitbucketClient {
     fn default() -> Self {
         Self {
             http_client: Client::new(),
-            uri: String::new(),
+            host: String::new(),
+            scheme: Scheme::HTTP,
             auth: None,
         }
     }
@@ -55,7 +43,8 @@ impl Default for BitbucketClient {
 impl BitbucketClient {
     pub fn with_auth(host: &str, scheme: Scheme, auth: Authorization) -> Self {
         Self {
-            uri: format_host_uri(host, scheme),
+            host: host.to_owned(),
+            scheme,
             auth: Some(auth),
             ..Default::default()
         }
@@ -65,7 +54,8 @@ impl BitbucketClient {
 impl BitbucketClient {
     pub fn new(host: &str, scheme: Scheme) -> Self {
         Self {
-            uri: format_host_uri(host, scheme),
+            host: host.to_owned(),
+            scheme,
             ..Default::default()
         }
     }
@@ -120,9 +110,11 @@ impl BitbucketClient {
 
 #[async_trait]
 impl AsyncRestClient for BitbucketClient {
-    fn uri(&self) -> &str {
-        &self.uri
+    fn host(&self) -> &str {
+        &self.host
     }
+
+    fn scheme(&self) -> &Scheme { &self.scheme }
 
     async fn get(&self, uri: &str) -> Result<Response> {
         self.perform(|| self.http_client.get(uri)).await

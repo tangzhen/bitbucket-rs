@@ -5,6 +5,7 @@ use serde::{
     Serialize,
     de::DeserializeOwned,
 };
+use crate::Scheme;
 
 pub trait Payload: Serialize + Send + Sync {}
 
@@ -12,7 +13,9 @@ impl<T> Payload for T where T: Serialize + Send + Sync {}
 
 #[async_trait]
 pub trait AsyncRestClient {
-    fn uri(&self) -> &str;
+    fn host(&self) -> &str;
+
+    fn scheme(&self) -> &Scheme;
 
     async fn get(&self, uri: &str) -> Result<Response>;
 
@@ -38,8 +41,12 @@ impl<C> AsyncRestClient for Box<C>
     where
         C: AsyncRestClient + ?Sized + Sync + Send
 {
-    fn uri(&self) -> &str {
-        (**self).uri()
+    fn host(&self) -> &str {
+        (**self).host()
+    }
+
+    fn scheme(&self) -> &Scheme {
+        (**self).scheme()
     }
 
     async fn get(&self, uri: &str) -> Result<Response> {

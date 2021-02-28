@@ -8,3 +8,9 @@ pub mod resources;
 pub mod traits;
 pub mod models;
 pub mod uri_builders;
+
+#[derive(Debug, Clone)]
+pub enum Scheme {
+    HTTP,
+    HTTPS,
+}

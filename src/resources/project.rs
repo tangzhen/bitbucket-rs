@@ -2,10 +2,11 @@ use anyhow::Result;
 use bytes::Bytes;
 
 use crate::{models::{get, post}, resources::util::accumulate_pages, traits::AsyncRestClient};
+use crate::uri_builders::{ProjectResourceUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct ProjectResource<'client, C> {
     client: &'client C,
-    uri: String,
+    uri_builder: ProjectResourceUriBuilder<'client>,
 }
 
 impl<'client, C> ProjectResource<'client, C>
@@ -13,46 +14,45 @@ impl<'client, C> ProjectResource<'client, C>
         C: AsyncRestClient,
 {
     pub fn new(client: &'client C) -> Self {
-        let uri = format!("{}/projects", client.uri());
-        Self { client, uri }
-    }
+        let uri_builder = ResourceUriBuilder::default()
+            .scheme(client.scheme())
+            .host(client.host())
+            .projects();
 
-    pub fn uri(&self) -> &str {
-        &self.uri
+        Self { client, uri_builder }
     }
 
     pub async fn get_all_projects(&self) -> Result<Vec<get::Project>> {
-        accumulate_pages(&self.uri, |uri| {
+        let uri = self.uri_builder.build()?;
+        accumulate_pages(&uri, |uri| {
             let uri = uri.to_owned();
             async move { self.client.get_as(&uri).await }
         }).await
     }
 
     pub async fn get_project(&self, project: &str) -> Result<get::Project> {
-        let uri = self.uri_with_project(project);
+        let uri = self.uri_builder.clone().project(project).build()?;
         self.client.get_as(&uri).await
     }
 
     pub async fn get_project_avatar(&self, project: &str) -> Result<Bytes> {
-        let uri = format!("{}/avatar.png", self.uri_with_project(project));
+        let uri = self.uri_builder.clone().project(project).avatar().build()?;
         let bytes: Bytes = self.client.get(&uri).await?.bytes().await?;
         Ok(bytes)
     }
 
     pub async fn create_project(&self, project: &post::Project) -> Result<get::Project> {
-        self.client.post(&self.uri, Some(project)).await
+        let uri = self.uri_builder.build()?;
+        self.client.post(&uri, Some(project)).await
     }
 
     pub async fn update_project(&self, project: &str, payload: &post::Project) -> Result<get::Project> {
-        self.client.put(&self.uri_with_project(project), Some(payload)).await
+        let uri = self.uri_builder.clone().project(project).build()?;
+        self.client.put(&uri, Some(payload)).await
     }
 
     pub async fn delete_project(&self, project: &str) -> Result<()> {
-        self.client.delete(&self.uri_with_project(project)).await
-    }
-
-    #[inline]
-    fn uri_with_project(&self, project: &str) -> String {
-        format!("{}/{}", self.uri, project)
+        let uri = self.uri_builder.clone().project(project).build()?;
+        self.client.delete(&uri).await
     }
 }

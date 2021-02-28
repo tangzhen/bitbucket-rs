@@ -13,7 +13,7 @@ impl<'client, C> PullRequestResource<'client, C>
         C: AsyncRestClient
 {
     pub fn new(client: &'client C, project: &str, repository: &str) -> Self {
-        let uri = format!("{}/projects/{}/repos/{}/pull-requests", client.uri(), project, repository);
+        let uri = format!("{}/projects/{}/repos/{}/pull-requests", "http://stash.test.com/rest/api/1.0", project, repository);
         Self { client, uri }
     }
 

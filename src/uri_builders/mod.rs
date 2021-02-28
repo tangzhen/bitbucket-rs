@@ -1,6 +1,43 @@
+use std::fmt;
+
 const REST_API_URI: &'static str = "rest/api/1.0";
 
-type BuildResult = Result<String, String>;
+#[derive(Debug)]
+pub struct BuildError {
+    msg: String,
+}
+
+impl BuildError {
+    pub fn new(msg: String) -> Self {
+        Self { msg }
+    }
+
+    pub fn msg(&self) -> &str {
+        &self.msg
+    }
+}
+
+impl fmt::Display for BuildError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::result::Result<(), fmt::Error> {
+        write!(f, "{}", self.msg)
+    }
+}
+
+impl Error for BuildError {}
+
+impl From<String> for BuildError {
+    fn from(msg: String) -> Self {
+        BuildError::new(msg)
+    }
+}
+
+impl From<&str> for BuildError {
+    fn from(msg: &str) -> Self {
+        BuildError::new(msg.to_owned())
+    }
+}
+
+type BuildResult = Result<String, BuildError>;
 
 pub trait UriBuilder {
     fn build(&self) -> BuildResult;
@@ -37,6 +74,8 @@ pub use project::*;
 pub use repository::*;
 pub use branch::*;
 pub use commit::*;
+use std::fmt::Formatter;
+use std::error::Error;
 
 #[cfg(test)]
 mod tests {
