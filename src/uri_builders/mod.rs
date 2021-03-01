@@ -61,6 +61,27 @@ impl<B> TerminalUriBuilder<B>
     }
 }
 
+#[cfg(test)]
+#[macro_use]
+mod tests {
+    use crate::uri_builders::REST_API_URI;
+
+    pub const TEST_HOST: &'static str = "stash.test.com";
+    pub const TEST_PROJECT: &'static str = "RRJ";
+    pub const TEST_REPO: &'static str = "REPO";
+
+    pub fn base_uri() -> String {
+        format!("http://{}/{}", TEST_HOST, REST_API_URI)
+    }
+
+    macro_rules! assert_uri {
+        ($uri:expr, $expected:expr) => {
+            assert!($uri.is_ok());
+            assert_eq!($uri.unwrap(), $expected);
+        }
+    }
+}
+
 mod resource;
 mod admin;
 mod project;
@@ -77,15 +98,3 @@ pub use commit::*;
 use std::fmt::Formatter;
 use std::error::Error;
 
-#[cfg(test)]
-mod tests {
-    use crate::uri_builders::REST_API_URI;
-
-    pub const TEST_HOST: &'static str = "stash.test.com";
-    pub const TEST_PROJECT: &'static str = "RRJ";
-    pub const TEST_REPO: &'static str = "REPO";
-
-    pub fn base_uri() -> String {
-        format!("http://{}/{}", TEST_HOST, REST_API_URI)
-    }
-}

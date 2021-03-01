@@ -98,87 +98,60 @@ mod tests {
         )
     }
 
+    fn builder<'a>() -> WithCommitResourceUriBuilder<'a> {
+        ResourceUriBuilder::default()
+            .host(TEST_HOST)
+            .projects()
+            .project(TEST_PROJECT)
+            .repos()
+            .repository(TEST_REPO)
+            .commits()
+            .commit(commit_id())
+    }
+
     fn commit_id() -> &'static str { "76bf028" }
 
     #[test]
     fn commit_resource_uri_works() {
         let uri = ResourceUriBuilder::default()
             .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
+            .projects()
+            .project(TEST_PROJECT)
+            .repos()
+            .repository(TEST_REPO)
             .commits()
             .build();
 
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), base_uri());
+        assert_uri!(uri, base_uri());
     }
 
     #[test]
     fn with_commit_uri_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
-            .commits().commit(commit_id())
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/{}", base_uri(), commit_id()));
+        let uri = builder().build();
+        assert_uri!(uri, format!("{}/{}", base_uri(), commit_id()));
     }
 
     #[test]
     fn commit_changes_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
-            .commits().commit(commit_id())
-            .changes()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/{}/changes", base_uri(), commit_id()));
+        let uri = builder().changes().build();
+        assert_uri!(uri, format!("{}/{}/changes", base_uri(), commit_id()));
     }
 
     #[test]
     fn commit_comments_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
-            .commits().commit(commit_id())
-            .comments()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/{}/comments", base_uri(), commit_id()));
+        let uri = builder().comments().build();
+        assert_uri!(uri, format!("{}/{}/comments", base_uri(), commit_id()));
     }
 
     #[test]
     fn commit_diff_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
-            .commits().commit(commit_id())
-            .diff()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/{}/diff", base_uri(), commit_id()));
+        let uri = builder().diff().build();
+        assert_uri!(uri, format!("{}/{}/diff", base_uri(), commit_id()));
     }
 
     #[test]
     fn commit_watch_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
-            .commits().commit(commit_id())
-            .watch()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/{}/watch", base_uri(), commit_id()));
+        let uri = builder().watch().build();
+        assert_uri!(uri, format!("{}/{}/watch", base_uri(), commit_id()));
     }
 }

@@ -51,7 +51,7 @@ impl<'r> UriBuilder for ResourceUriBuilder<'r> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::tests::{TEST_HOST, base_uri, TEST_PROJECT};
+    use crate::uri_builders::tests::{TEST_HOST, base_uri};
 
     #[test]
     fn resource_uri_builder_requires_host() {
@@ -63,23 +63,21 @@ mod tests {
     #[test]
     fn resource_uri_builder_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), base_uri());
+        assert_uri!(uri, base_uri());
     }
 
     #[test]
     fn resource_uri_with_scheme_works() {
         let uri = ResourceUriBuilder::default().scheme(&Scheme::HTTPS).host(TEST_HOST).build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("https://{}/{}", TEST_HOST, REST_API_URI));
+        assert_uri!(uri, format!("https://{}/{}", TEST_HOST, REST_API_URI));
     }
 
     #[test]
     fn resource_clone_works() {
         let builder = ResourceUriBuilder::default().host(TEST_HOST);
-        let uri = builder.clone().host("stash.clone.com").build().unwrap();
-        assert_eq!(uri, "http://stash.clone.com/rest/api/1.0");
-        let uri = builder.build().unwrap();
-        assert_eq!(uri, base_uri());
+        let uri = builder.clone().host("stash.clone.com").build();
+        assert_uri!(uri, "http://stash.clone.com/rest/api/1.0");
+        let uri = builder.build();
+        assert_uri!(uri, base_uri());
     }
 }

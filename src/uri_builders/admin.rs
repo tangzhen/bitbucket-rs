@@ -200,7 +200,6 @@ impl<'r> UriBuilder for AdminUserResourceUriBuilder<'r> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -210,195 +209,109 @@ mod tests {
         format!("{}/admin", crate::uri_builders::tests::base_uri())
     }
 
+    fn builder<'a>() -> AdminResourceUriBuilder<'a> {
+        ResourceUriBuilder::default().host(TEST_HOST).admin()
+    }
+
     #[test]
     fn admin_resource_uri_works() {
-        let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), base_uri());
+        let uri = builder().build();
+        assert_uri!(uri, base_uri());
     }
 
     #[test]
     fn admin_cluster_works() {
-        let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().cluster().build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/cluster", base_uri()));
+        let uri = builder().cluster().build();
+        assert_uri!(uri, format!("{}/cluster", base_uri()));
     }
 
     #[test]
     fn admin_licence_works() {
-        let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().licence().build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/licence", base_uri()));
+        let uri = builder().licence().build();
+        assert_uri!(uri, format!("{}/licence", base_uri()));
     }
 
     #[test]
     fn admin_groups_resource_uri_works() {
-        let uri = ResourceUriBuilder::default().host(TEST_HOST).admin().groups().build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/groups", base_uri()));
+        let uri = builder().groups().build();
+        assert_uri!(uri, format!("{}/groups", base_uri()));
     }
 
     #[test]
     fn admin_groups_add_user_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .groups()
-            .add_user()
-            .build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/groups/add-user", base_uri()));
+        let uri = builder().groups().add_user().build();
+        assert_uri!(uri, format!("{}/groups/add-user", base_uri()));
     }
 
     #[test]
     fn admin_groups_add_users_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .groups()
-            .add_users()
-            .build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/groups/add-users", base_uri()));
+        let uri = builder().groups().add_users().build();
+        assert_uri!(uri, format!("{}/groups/add-users", base_uri()));
     }
 
     #[test]
     fn admin_groups_more_members_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .groups()
-            .more_members()
-            .build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/groups/more-members", base_uri()));
+        let uri = builder().groups().more_members().build();
+        assert_uri!(uri, format!("{}/groups/more-members", base_uri()));
     }
 
     #[test]
     fn admin_groups_add_more_non_members_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .groups()
-            .more_non_members()
-            .build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/groups/more-non-members", base_uri()));
+        let uri = builder().groups().more_non_members().build();
+        assert_uri!(uri, format!("{}/groups/more-non-members", base_uri()));
     }
 
     #[test]
     fn admin_users_resource_uri_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users", base_uri()));
+        let uri = builder().users().build();
+        assert_uri!(uri, format!("{}/users", base_uri()));
     }
 
     #[test]
     fn admin_users_add_group_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .add_group()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/add-group", base_uri()));
+        let uri = builder().users().add_group().build();
+        assert_uri!(uri, format!("{}/users/add-group", base_uri()));
     }
 
     #[test]
     fn admin_users_add_groups_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .add_groups()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/add-groups", base_uri()));
+        let uri = builder().users().add_groups().build();
+        assert_uri!(uri, format!("{}/users/add-groups", base_uri()));
     }
 
     #[test]
     fn admin_users_captcha_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .captcha()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/captcha", base_uri()));
+        let uri = builder().users().captcha().build();
+        assert_uri!(uri, format!("{}/users/captcha", base_uri()));
     }
 
     #[test]
     fn admin_users_credentials_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .credentials()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/credentials", base_uri()));
+        let uri = builder().users().credentials().build();
+        assert_uri!(uri, format!("{}/users/credentials", base_uri()));
     }
 
     #[test]
     fn admin_users_more_members_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .more_members()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/more-members", base_uri()));
+        let uri = builder().users().more_members().build();
+        assert_uri!(uri, format!("{}/users/more-members", base_uri()));
     }
 
     #[test]
     fn admin_users_more_non_members_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .more_non_members()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/more-non-members", base_uri()));
+        let uri = builder().users().more_non_members().build();
+        assert_uri!(uri, format!("{}/users/more-non-members", base_uri()));
     }
 
     #[test]
     fn admin_users_remove_group_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .remove_group()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/remove-group", base_uri()));
+        let uri = builder().users().remove_group().build();
+        assert_uri!(uri, format!("{}/users/remove-group", base_uri()));
     }
 
     #[test]
     fn admin_users_rename_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .admin()
-            .users()
-            .rename()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/users/rename", base_uri()));
+        let uri = builder().users().rename().build();
+        assert_uri!(uri, format!("{}/users/rename", base_uri()));
     }
 }

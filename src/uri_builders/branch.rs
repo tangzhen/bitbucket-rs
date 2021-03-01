@@ -46,30 +46,25 @@ mod tests {
         )
     }
 
+    fn builder<'a>() -> BranchResourceUriBuilder<'a> {
+        ResourceUriBuilder::default()
+            .host(TEST_HOST)
+            .projects()
+            .project(TEST_PROJECT)
+            .repos()
+            .repository(TEST_REPO)
+            .branches()
+    }
+
     #[test]
     fn branch_resource_uri_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
-            .branches()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), base_uri());
+        let uri = builder().build();
+        assert_uri!(uri, base_uri());
     }
 
     #[test]
     fn branch_default_uri_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects().project(TEST_PROJECT)
-            .repos().repository(TEST_REPO)
-            .branches()
-            .default()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/default", base_uri()));
+        let uri = builder().default().build();
+        assert_uri!(uri, format!("{}/default", base_uri()));
     }
 }

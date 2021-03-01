@@ -145,10 +145,23 @@ impl<'r> UriBuilder for WithRepositoryResourceUriBuilder<'r> {
 mod tests {
     use super::*;
     use crate::uri_builders::ResourceUriBuilder;
-    use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT};
+    use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT, TEST_REPO};
 
     fn base_uri() -> String {
         format!("{}/projects/{}/repos", crate::uri_builders::tests::base_uri(), TEST_PROJECT)
+    }
+
+    fn builder<'a>() -> WithRepositoryResourceUriBuilder<'a> {
+        ResourceUriBuilder::default()
+            .host(TEST_HOST)
+            .projects()
+            .project(TEST_PROJECT)
+            .repos()
+            .repository(TEST_REPO)
+    }
+
+    fn format_repo_uri(path: &str) -> String {
+        format!("{}/{}/{}", base_uri(), TEST_REPO, path)
     }
 
     #[test]
@@ -160,7 +173,42 @@ mod tests {
             .repos()
             .build();
 
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), base_uri());
+        assert_uri!(uri, base_uri());
+    }
+
+    #[test]
+    fn with_repository_uri_works() {
+        let uri = builder().build();
+        assert_uri!(uri, format!("{}/{}", base_uri(), TEST_REPO));
+    }
+
+    #[test]
+    fn repo_forks_uri_works() {
+        let uri = builder().forks().build();
+        assert_uri!(uri, format_repo_uri("forks"));
+    }
+
+    #[test]
+    fn repo_recreate_uri_works() {
+        let uri = builder().recreate().build();
+        assert_uri!(uri, format_repo_uri("recreate"));
+    }
+
+    #[test]
+    fn repo_relate_uri_works() {
+        let uri = builder().related().build();
+        assert_uri!(uri, format_repo_uri("related"));
+    }
+
+    #[test]
+    fn repo_changes_uri_works() {
+        let uri = builder().changes().build();
+        assert_uri!(uri, format_repo_uri("changes"));
+    }
+
+    #[test]
+    fn repo_tags_uri_works() {
+        let uri = builder().tags().build();
+        assert_uri!(uri, format_repo_uri("tags"));
     }
 }

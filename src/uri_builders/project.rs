@@ -75,35 +75,28 @@ mod tests {
         format!("{}/projects", crate::uri_builders::tests::base_uri())
     }
 
+    fn builder<'a>() -> WithProjectResourceUriBuilder<'a> {
+        ResourceUriBuilder::default()
+            .host(TEST_HOST)
+            .projects()
+            .project(TEST_PROJECT)
+    }
+
     #[test]
     fn project_resource_uri_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).projects().build();
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), base_uri());
+        assert_uri!(uri, base_uri());
     }
 
     #[test]
     fn with_project_uri_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects()
-            .project(TEST_PROJECT)
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/{}", base_uri(), TEST_PROJECT));
+        let uri = builder().build();
+        assert_uri!(uri, format!("{}/{}", base_uri(), TEST_PROJECT));
     }
 
     #[test]
     fn with_project_avatar_works() {
-        let uri = ResourceUriBuilder::default()
-            .host(TEST_HOST)
-            .projects()
-            .project(TEST_PROJECT)
-            .avatar()
-            .build();
-
-        assert!(uri.is_ok());
-        assert_eq!(uri.unwrap(), format!("{}/{}/avatar.png", base_uri(), TEST_PROJECT));
+        let uri = builder().avatar().build();
+        assert_uri!(uri, format!("{}/{}/avatar.png", base_uri(), TEST_PROJECT));
     }
 }

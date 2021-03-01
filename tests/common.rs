@@ -42,26 +42,30 @@ impl<'c, R> TestContext<'c, R> {
     }
 }
 
-macro_rules! __context {
-    ($server:ident, $client:ident) => {
-        let $server = std::boxed::Box::new(MockServer::start_async().await);
-        let $server = std::boxed::Box::leak($server);
-        let $client = std::boxed::Box::new(crate::common::make_client(&$server));
-        let $client = std::boxed::Box::leak($client);
-    };
-}
+#[cfg(test)]
+#[macro_use]
+mod tests {
+    macro_rules! __context {
+        ($server:ident, $client:ident) => {
+            let $server = std::boxed::Box::new(MockServer::start_async().await);
+            let $server = std::boxed::Box::leak($server);
+            let $client = std::boxed::Box::new(crate::common::make_client(&$server));
+            let $client = std::boxed::Box::leak($client);
+        };
+    }
 
-#[macro_export]
-macro_rules! context {
-    ($resource_type:tt) => {{
-        __context!(server, client);
-        let resource = <bitbucket_rs::resources::$resource_type<_>>::new(client);
-        crate::common::TestContext::new(server, client, resource)
-    }};
+    #[macro_export]
+    macro_rules! context {
+        ($resource_type:tt) => {{
+            __context!(server, client);
+            let resource = <bitbucket_rs::resources::$resource_type<_>>::new(client);
+            crate::common::TestContext::new(server, client, resource)
+        }};
 
-    ($resource_type:tt, $($args:expr)*) => {{
-        __context!(server, client);
-        let resource = <bitbucket_rs::resources::$resource_type<_>>::new(client, $($args)*);
-        crate::common::TestContext::new(server, client, resource)
-    }};
+        ($resource_type:tt, $($args:expr)*) => {{
+            __context!(server, client);
+            let resource = <bitbucket_rs::resources::$resource_type<_>>::new(client, $($args)*);
+            crate::common::TestContext::new(server, client, resource)
+        }};
+    }
 }
