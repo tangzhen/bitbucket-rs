@@ -55,8 +55,7 @@ fn get_repo() -> &'static str {
             ],
             "self": [
                 {
-                    "url": "http://link/to/repository",
-                    "rel": "self"
+                    "href": "http://link/to/repository"
                 }
             ]
         }

@@ -95,7 +95,7 @@ pub struct RepositoryCloneLinkPart {
 pub struct RepositoryLinks {
     pub clone: Vec<RepositoryCloneLinkPart>,
     #[serde(rename(deserialize = "self"))]
-    pub links: Vec<Link>,
+    pub links: Vec<LinkPart>,
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]
