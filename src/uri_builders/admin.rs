@@ -7,6 +7,7 @@ use serde_plain;
 enum AdminAction {
     Groups,
     Users,
+    Permissions,
     Cluster,
     Licence,
 }
@@ -30,6 +31,11 @@ impl<'r> AdminResourceUriBuilder<'r> {
     pub fn users(mut self) -> AdminUserResourceUriBuilder<'r> {
         self.action = Some(AdminAction::Users);
         AdminUserResourceUriBuilder::new(self)
+    }
+
+    pub fn permissions(mut self) -> AdminPermissionsResourceUriBuilder<'r> {
+        self.action = Some(AdminAction::Permissions);
+        AdminPermissionsResourceUriBuilder::new(self)
     }
 
     pub fn cluster(mut self) -> TerminalUriBuilder<Self> {
@@ -200,6 +206,111 @@ impl<'r> UriBuilder for AdminUserResourceUriBuilder<'r> {
     }
 }
 
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+enum AdminPermissionAction {
+    Groups,
+    Users,
+}
+
+#[derive(Debug, Clone)]
+pub struct AdminPermissionsResourceUriBuilder<'r> {
+    builder: AdminResourceUriBuilder<'r>,
+    action: Option<AdminPermissionAction>,
+}
+
+impl<'r> AdminPermissionsResourceUriBuilder<'r> {
+    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
+        Self { builder, action: None }
+    }
+
+    pub fn groups(mut self) -> AdminGroupPermissionResourceUriBuilder<'r> {
+        self.action = Some(AdminPermissionAction::Groups);
+        AdminGroupPermissionResourceUriBuilder::new(self)
+    }
+
+    pub fn users(mut self) -> AdminUserPermissionResourceUriBuilder<'r> {
+        self.action = Some(AdminPermissionAction::Users);
+        AdminUserPermissionResourceUriBuilder::new(self)
+    }
+}
+
+impl<'r> UriBuilder for AdminPermissionsResourceUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = self.builder.build()?;
+        let uri = match &self.action {
+            None => uri,
+            Some(action) => {
+                let action = serde_plain::to_string(action).unwrap();
+                format!("{}/{}", uri, action)
+            }
+        };
+
+        Ok(uri)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AdminGroupPermissionResourceUriBuilder<'r> {
+    builder: AdminPermissionsResourceUriBuilder<'r>,
+    none: bool,
+}
+
+impl<'r> AdminGroupPermissionResourceUriBuilder<'r> {
+    pub fn new(builder: AdminPermissionsResourceUriBuilder<'r>) -> Self {
+        Self { builder, none: false }
+    }
+
+    pub fn none(mut self) -> TerminalUriBuilder<Self> {
+        self.none = true;
+        TerminalUriBuilder::new(self)
+    }
+}
+
+impl<'r> UriBuilder for AdminGroupPermissionResourceUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = self.builder.build()?;
+        let uri = if self.none {
+            format!("{}/none", uri)
+        } else {
+            uri
+        };
+
+        Ok(uri)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AdminUserPermissionResourceUriBuilder<'r> {
+    builder: AdminPermissionsResourceUriBuilder<'r>,
+    none: bool,
+}
+
+impl<'r> AdminUserPermissionResourceUriBuilder<'r> {
+    pub fn new(builder: AdminPermissionsResourceUriBuilder<'r>) -> Self {
+        Self { builder, none: false }
+    }
+
+    pub fn none(mut self) -> TerminalUriBuilder<Self> {
+        self.none = true;
+        TerminalUriBuilder::new(self)
+    }
+}
+
+impl<'r> UriBuilder for AdminUserPermissionResourceUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = self.builder.build()?;
+        let uri = if self.none {
+            format!("{}/none", uri)
+        } else {
+            uri
+        };
+
+        Ok(uri)
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -313,5 +424,35 @@ mod tests {
     fn admin_users_rename_works() {
         let uri = builder().users().rename().build();
         assert_uri!(uri, format!("{}/users/rename", base_uri()));
+    }
+
+    #[test]
+    fn admin_permissions_works() {
+        let uri = builder().permissions().build();
+        assert_uri!(uri, format!("{}/permissions", base_uri()));
+    }
+
+    #[test]
+    fn admin_group_permissions_works() {
+        let uri = builder().permissions().groups().build();
+        assert_uri!(uri, format!("{}/permissions/groups", base_uri()));
+    }
+
+    #[test]
+    fn admin_none_group_permissions_works() {
+        let uri = builder().permissions().groups().none().build();
+        assert_uri!(uri, format!("{}/permissions/groups/none", base_uri()));
+    }
+
+    #[test]
+    fn admin_user_permissions_works() {
+        let uri = builder().permissions().users().build();
+        assert_uri!(uri, format!("{}/permissions/users", base_uri()));
+    }
+
+    #[test]
+    fn admin_none_user_permissions_works() {
+        let uri = builder().permissions().users().none().build();
+        assert_uri!(uri, format!("{}/permissions/users/none", base_uri()));
     }
 }
