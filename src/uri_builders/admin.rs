@@ -10,6 +10,7 @@ enum AdminAction {
     Permissions,
     Cluster,
     Licence,
+    MailServer,
 }
 
 #[derive(Debug, Clone)]
@@ -36,6 +37,11 @@ impl<'r> AdminResourceUriBuilder<'r> {
     pub fn permissions(mut self) -> AdminPermissionsResourceUriBuilder<'r> {
         self.action = Some(AdminAction::Permissions);
         AdminPermissionsResourceUriBuilder::new(self)
+    }
+
+    pub fn mail_server(mut self) -> AdminMailServerResourceUriBuilder<'r> {
+        self.action = Some(AdminAction::MailServer);
+        AdminMailServerResourceUriBuilder::new(self)
     }
 
     pub fn cluster(mut self) -> TerminalUriBuilder<Self> {
@@ -310,6 +316,36 @@ impl<'r> UriBuilder for AdminUserPermissionResourceUriBuilder<'r> {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct AdminMailServerResourceUriBuilder<'r> {
+    builder: AdminResourceUriBuilder<'r>,
+    sender_address: bool,
+}
+
+impl<'r> AdminMailServerResourceUriBuilder<'r> {
+    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
+        Self { builder, sender_address: false }
+    }
+
+    pub fn sender_address(mut self) -> TerminalUriBuilder<Self> {
+        self.sender_address = true;
+        TerminalUriBuilder::new(self)
+    }
+}
+
+impl<'r> UriBuilder for AdminMailServerResourceUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = self.builder.build()?;
+        let uri = if self.sender_address {
+            format!("{}/sender-address", uri)
+        } else {
+            uri
+        };
+
+        Ok(uri)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -454,5 +490,17 @@ mod tests {
     fn admin_none_user_permissions_works() {
         let uri = builder().permissions().users().none().build();
         assert_uri!(uri, format!("{}/permissions/users/none", base_uri()));
+    }
+
+    #[test]
+    fn admin_mail_server_works() {
+        let uri = builder().mail_server().build();
+        assert_uri!(uri, format!("{}/mail-server", base_uri()));
+    }
+
+    #[test]
+    fn admin_mail_server_sender_address_works() {
+        let uri = builder().mail_server().sender_address().build();
+        assert_uri!(uri, format!("{}/mail-server/sender-address", base_uri()));
     }
 }

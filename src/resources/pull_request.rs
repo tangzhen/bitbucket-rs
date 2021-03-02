@@ -2,10 +2,11 @@ use crate::traits::AsyncRestClient;
 use anyhow::Result;
 use crate::models::get::{PullRequest, PullRequestState};
 use crate::resources::util::accumulate_pages;
+use crate::uri_builders::{PullRequestResourceUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct PullRequestResource<'client, C> {
     client: &'client C,
-    uri: String,
+    uri_builder: PullRequestResourceUriBuilder<'client>,
 }
 
 impl<'client, C> PullRequestResource<'client, C>
@@ -13,12 +14,20 @@ impl<'client, C> PullRequestResource<'client, C>
         C: AsyncRestClient
 {
     pub fn new(client: &'client C, project: &str, repository: &str) -> Self {
-        let uri = format!("{}/projects/{}/repos/{}/pull-requests", "http://stash.test.com/rest/api/1.0", project, repository);
-        Self { client, uri }
+        let uri_builder = ResourceUriBuilder::default()
+            .scheme(client.scheme())
+            .host(client.host())
+            .projects()
+            .project(project)
+            .repos()
+            .repository(repository)
+            .pull_requests();
+
+        Self { client, uri_builder }
     }
 
     pub async fn get_all_pull_requests_with_state(&self, state: PullRequestState) -> Result<Vec<PullRequest>> {
-        let uri = format!("{}?state={}", self.uri, state.as_str());
+        let uri = format!("{}?state={}", self.uri_builder.build()?, state.as_str());
         accumulate_pages(&uri, |uri| {
             let uri = uri.to_owned();
             async move { self.client.get_as(&uri).await }
@@ -42,7 +51,7 @@ impl<'client, C> PullRequestResource<'client, C>
     }
 
     pub async fn get_pull_request(&self, id: u64) -> Result<PullRequest> {
-        let uri = format!("{}/{}", self.uri, id);
+        let uri = self.uri_builder.clone().pull_request(id).build()?;
         self.client.get_as(&uri).await
     }
 }

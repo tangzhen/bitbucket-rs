@@ -88,6 +88,7 @@ mod project;
 mod repository;
 mod branch;
 mod commit;
+mod pull_request;
 
 pub use resource::*;
 pub use admin::*;
@@ -95,6 +96,6 @@ pub use project::*;
 pub use repository::*;
 pub use branch::*;
 pub use commit::*;
+pub use pull_request::*;
 use std::fmt::Formatter;
 use std::error::Error;
-

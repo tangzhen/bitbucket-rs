@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithProjectResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchResourceUriBuilder, CommitResourceUriBuilder};
+use crate::uri_builders::{WithProjectResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchResourceUriBuilder, CommitResourceUriBuilder, PullRequestResourceUriBuilder};
 use serde::Serialize;
 use serde_plain;
 
@@ -114,10 +114,9 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
         TerminalUriBuilder::new(self)
     }
 
-    // TODO: This needs another type
-    pub fn pull_requests(mut self) -> TerminalUriBuilder<Self> {
+    pub fn pull_requests(mut self) -> PullRequestResourceUriBuilder<'r> {
         self.action = Some(RepositoryAction::PullRequests);
-        TerminalUriBuilder::new(self)
+        PullRequestResourceUriBuilder::new(self)
     }
 
     pub fn tags(mut self) -> TerminalUriBuilder<Self> {
