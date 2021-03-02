@@ -1,13 +1,13 @@
-use crate::uri_builders::{WithRepositoryResourceUriBuilder, TerminalUriBuilder, UriBuilder, BuildResult};
+use crate::uri_builders::{WithRepositoryUriBuilder, TerminalUriBuilder, UriBuilder, BuildResult};
 
 #[derive(Debug, Clone)]
-pub struct BranchResourceUriBuilder<'r> {
-    builder: WithRepositoryResourceUriBuilder<'r>,
+pub struct BranchUriBuilder<'r> {
+    builder: WithRepositoryUriBuilder<'r>,
     default: bool,
 }
 
-impl<'r> BranchResourceUriBuilder<'r> {
-    pub fn new(builder: WithRepositoryResourceUriBuilder<'r>) -> Self {
+impl<'r> BranchUriBuilder<'r> {
+    pub fn new(builder: WithRepositoryUriBuilder<'r>) -> Self {
         Self { builder, default: false }
     }
 
@@ -17,7 +17,7 @@ impl<'r> BranchResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for BranchResourceUriBuilder<'r> {
+impl<'r> UriBuilder for BranchUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = self.builder.build()?;
         let uri = if self.default {
@@ -46,7 +46,7 @@ mod tests {
         )
     }
 
-    fn builder<'a>() -> BranchResourceUriBuilder<'a> {
+    fn builder<'a>() -> BranchUriBuilder<'a> {
         ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()
@@ -57,7 +57,7 @@ mod tests {
     }
 
     #[test]
-    fn branch_resource_uri_works() {
+    fn branch_uri_works() {
         let uri = builder().build();
         assert_uri!(uri, base_uri());
     }

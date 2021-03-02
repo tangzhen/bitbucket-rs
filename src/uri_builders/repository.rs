@@ -1,23 +1,23 @@
-use crate::uri_builders::{WithProjectResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchResourceUriBuilder, CommitResourceUriBuilder, PullRequestResourceUriBuilder};
+use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder};
 use serde::Serialize;
 use serde_plain;
 
 #[derive(Debug, Clone)]
-pub struct RepositoryResourceUriBuilder<'r> {
-    builder: WithProjectResourceUriBuilder<'r>,
+pub struct RepositoryUriBuilder<'r> {
+    builder: WithProjectUriBuilder<'r>,
 }
 
-impl<'r> RepositoryResourceUriBuilder<'r> {
-    pub fn new(builder: WithProjectResourceUriBuilder<'r>) -> Self {
+impl<'r> RepositoryUriBuilder<'r> {
+    pub fn new(builder: WithProjectUriBuilder<'r>) -> Self {
         Self { builder }
     }
 
-    pub fn repository(self, repo: &'r str) -> WithRepositoryResourceUriBuilder<'r> {
-        WithRepositoryResourceUriBuilder::new(self, repo)
+    pub fn repository(self, repo: &'r str) -> WithRepositoryUriBuilder<'r> {
+        WithRepositoryUriBuilder::new(self, repo)
     }
 }
 
-impl<'r> UriBuilder for RepositoryResourceUriBuilder<'r> {
+impl<'r> UriBuilder for RepositoryUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/repos", self.builder.build()?);
         Ok(uri)
@@ -43,14 +43,14 @@ enum RepositoryAction {
 }
 
 #[derive(Debug, Clone)]
-pub struct WithRepositoryResourceUriBuilder<'r> {
-    builder: RepositoryResourceUriBuilder<'r>,
+pub struct WithRepositoryUriBuilder<'r> {
+    builder: RepositoryUriBuilder<'r>,
     repo: &'r str,
     action: Option<RepositoryAction>,
 }
 
-impl<'r> WithRepositoryResourceUriBuilder<'r> {
-    pub fn new(builder: RepositoryResourceUriBuilder<'r>, repo: &'r str) -> Self {
+impl<'r> WithRepositoryUriBuilder<'r> {
+    pub fn new(builder: RepositoryUriBuilder<'r>, repo: &'r str) -> Self {
         Self { builder, repo, action: None }
     }
 
@@ -69,9 +69,9 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
         TerminalUriBuilder::new(self)
     }
 
-    pub fn branches(mut self) -> BranchResourceUriBuilder<'r> {
+    pub fn branches(mut self) -> BranchUriBuilder<'r> {
         self.action = Some(RepositoryAction::Branches);
-        BranchResourceUriBuilder::new(self)
+        BranchUriBuilder::new(self)
     }
 
     // TODO: This needs another type
@@ -85,9 +85,9 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
         TerminalUriBuilder::new(self)
     }
 
-    pub fn commits(mut self) -> CommitResourceUriBuilder<'r> {
+    pub fn commits(mut self) -> CommitUriBuilder<'r> {
         self.action = Some(RepositoryAction::Commits);
-        CommitResourceUriBuilder::new(self)
+        CommitUriBuilder::new(self)
     }
 
     // TODO: This needs another type
@@ -114,9 +114,9 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
         TerminalUriBuilder::new(self)
     }
 
-    pub fn pull_requests(mut self) -> PullRequestResourceUriBuilder<'r> {
+    pub fn pull_requests(mut self) -> PullRequestUriBuilder<'r> {
         self.action = Some(RepositoryAction::PullRequests);
-        PullRequestResourceUriBuilder::new(self)
+        PullRequestUriBuilder::new(self)
     }
 
     pub fn tags(mut self) -> TerminalUriBuilder<Self> {
@@ -125,7 +125,7 @@ impl<'r> WithRepositoryResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for WithRepositoryResourceUriBuilder<'r> {
+impl<'r> UriBuilder for WithRepositoryUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.repo);
         let uri = match &self.action {
@@ -150,7 +150,7 @@ mod tests {
         format!("{}/projects/{}/repos", crate::uri_builders::tests::base_uri(), TEST_PROJECT)
     }
 
-    fn builder<'a>() -> WithRepositoryResourceUriBuilder<'a> {
+    fn builder<'a>() -> WithRepositoryUriBuilder<'a> {
         ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()
@@ -164,7 +164,7 @@ mod tests {
     }
 
     #[test]
-    fn repository_resource_uri_works() {
+    fn repository_uri_works() {
         let uri = ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()

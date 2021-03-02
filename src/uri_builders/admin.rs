@@ -14,34 +14,34 @@ enum AdminAction {
 }
 
 #[derive(Debug, Clone)]
-pub struct AdminResourceUriBuilder<'r> {
+pub struct AdminUriBuilder<'r> {
     builder: ResourceUriBuilder<'r>,
     action: Option<AdminAction>,
 }
 
-impl<'r> AdminResourceUriBuilder<'r> {
+impl<'r> AdminUriBuilder<'r> {
     pub fn new(builder: ResourceUriBuilder<'r>) -> Self {
         Self { builder, action: None }
     }
 
-    pub fn groups(mut self) -> AdminGroupResourceUriBuilder<'r> {
+    pub fn groups(mut self) -> AdminGroupUriBuilder<'r> {
         self.action = Some(AdminAction::Groups);
-        AdminGroupResourceUriBuilder::new(self)
+        AdminGroupUriBuilder::new(self)
     }
 
-    pub fn users(mut self) -> AdminUserResourceUriBuilder<'r> {
+    pub fn users(mut self) -> AdminUserUriBuilder<'r> {
         self.action = Some(AdminAction::Users);
-        AdminUserResourceUriBuilder::new(self)
+        AdminUserUriBuilder::new(self)
     }
 
-    pub fn permissions(mut self) -> AdminPermissionsResourceUriBuilder<'r> {
+    pub fn permissions(mut self) -> AdminPermissionsUriBuilder<'r> {
         self.action = Some(AdminAction::Permissions);
-        AdminPermissionsResourceUriBuilder::new(self)
+        AdminPermissionsUriBuilder::new(self)
     }
 
-    pub fn mail_server(mut self) -> AdminMailServerResourceUriBuilder<'r> {
+    pub fn mail_server(mut self) -> AdminMailServerUriBuilder<'r> {
         self.action = Some(AdminAction::MailServer);
-        AdminMailServerResourceUriBuilder::new(self)
+        AdminMailServerUriBuilder::new(self)
     }
 
     pub fn cluster(mut self) -> TerminalUriBuilder<Self> {
@@ -55,7 +55,7 @@ impl<'r> AdminResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for AdminResourceUriBuilder<'r> {
+impl<'r> UriBuilder for AdminUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/admin", self.builder.build()?);
         let uri = match &self.action {
@@ -81,13 +81,13 @@ enum AdminGroupAction {
 }
 
 #[derive(Debug, Clone)]
-pub struct AdminGroupResourceUriBuilder<'r> {
-    builder: AdminResourceUriBuilder<'r>,
+pub struct AdminGroupUriBuilder<'r> {
+    builder: AdminUriBuilder<'r>,
     action: Option<AdminGroupAction>,
 }
 
-impl<'r> AdminGroupResourceUriBuilder<'r> {
-    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
+impl<'r> AdminGroupUriBuilder<'r> {
+    pub fn new(builder: AdminUriBuilder<'r>) -> Self {
         Self { builder, action: None }
     }
 
@@ -117,7 +117,7 @@ impl<'r> AdminGroupResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for AdminGroupResourceUriBuilder<'r> {
+impl<'r> UriBuilder for AdminGroupUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = self.builder.build()?;
         let uri = match &self.action {
@@ -146,13 +146,13 @@ enum AdminUserAction {
 }
 
 #[derive(Debug, Clone)]
-pub struct AdminUserResourceUriBuilder<'r> {
-    builder: AdminResourceUriBuilder<'r>,
+pub struct AdminUserUriBuilder<'r> {
+    builder: AdminUriBuilder<'r>,
     action: Option<AdminUserAction>,
 }
 
-impl<'r> AdminUserResourceUriBuilder<'r> {
-    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
+impl<'r> AdminUserUriBuilder<'r> {
+    pub fn new(builder: AdminUriBuilder<'r>) -> Self {
         Self { builder, action: None }
     }
 
@@ -197,7 +197,7 @@ impl<'r> AdminUserResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for AdminUserResourceUriBuilder<'r> {
+impl<'r> UriBuilder for AdminUserUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = self.builder.build()?;
         let uri = match &self.action {
@@ -220,28 +220,28 @@ enum AdminPermissionAction {
 }
 
 #[derive(Debug, Clone)]
-pub struct AdminPermissionsResourceUriBuilder<'r> {
-    builder: AdminResourceUriBuilder<'r>,
+pub struct AdminPermissionsUriBuilder<'r> {
+    builder: AdminUriBuilder<'r>,
     action: Option<AdminPermissionAction>,
 }
 
-impl<'r> AdminPermissionsResourceUriBuilder<'r> {
-    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
+impl<'r> AdminPermissionsUriBuilder<'r> {
+    pub fn new(builder: AdminUriBuilder<'r>) -> Self {
         Self { builder, action: None }
     }
 
-    pub fn groups(mut self) -> AdminGroupPermissionResourceUriBuilder<'r> {
+    pub fn groups(mut self) -> AdminGroupPermissionUriBuilder<'r> {
         self.action = Some(AdminPermissionAction::Groups);
-        AdminGroupPermissionResourceUriBuilder::new(self)
+        AdminGroupPermissionUriBuilder::new(self)
     }
 
-    pub fn users(mut self) -> AdminUserPermissionResourceUriBuilder<'r> {
+    pub fn users(mut self) -> AdminUserPermissionUriBuilder<'r> {
         self.action = Some(AdminPermissionAction::Users);
-        AdminUserPermissionResourceUriBuilder::new(self)
+        AdminUserPermissionUriBuilder::new(self)
     }
 }
 
-impl<'r> UriBuilder for AdminPermissionsResourceUriBuilder<'r> {
+impl<'r> UriBuilder for AdminPermissionsUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = self.builder.build()?;
         let uri = match &self.action {
@@ -257,13 +257,13 @@ impl<'r> UriBuilder for AdminPermissionsResourceUriBuilder<'r> {
 }
 
 #[derive(Debug, Clone)]
-pub struct AdminGroupPermissionResourceUriBuilder<'r> {
-    builder: AdminPermissionsResourceUriBuilder<'r>,
+pub struct AdminGroupPermissionUriBuilder<'r> {
+    builder: AdminPermissionsUriBuilder<'r>,
     none: bool,
 }
 
-impl<'r> AdminGroupPermissionResourceUriBuilder<'r> {
-    pub fn new(builder: AdminPermissionsResourceUriBuilder<'r>) -> Self {
+impl<'r> AdminGroupPermissionUriBuilder<'r> {
+    pub fn new(builder: AdminPermissionsUriBuilder<'r>) -> Self {
         Self { builder, none: false }
     }
 
@@ -273,7 +273,7 @@ impl<'r> AdminGroupPermissionResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for AdminGroupPermissionResourceUriBuilder<'r> {
+impl<'r> UriBuilder for AdminGroupPermissionUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = self.builder.build()?;
         let uri = if self.none {
@@ -287,13 +287,13 @@ impl<'r> UriBuilder for AdminGroupPermissionResourceUriBuilder<'r> {
 }
 
 #[derive(Debug, Clone)]
-pub struct AdminUserPermissionResourceUriBuilder<'r> {
-    builder: AdminPermissionsResourceUriBuilder<'r>,
+pub struct AdminUserPermissionUriBuilder<'r> {
+    builder: AdminPermissionsUriBuilder<'r>,
     none: bool,
 }
 
-impl<'r> AdminUserPermissionResourceUriBuilder<'r> {
-    pub fn new(builder: AdminPermissionsResourceUriBuilder<'r>) -> Self {
+impl<'r> AdminUserPermissionUriBuilder<'r> {
+    pub fn new(builder: AdminPermissionsUriBuilder<'r>) -> Self {
         Self { builder, none: false }
     }
 
@@ -303,7 +303,7 @@ impl<'r> AdminUserPermissionResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for AdminUserPermissionResourceUriBuilder<'r> {
+impl<'r> UriBuilder for AdminUserPermissionUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = self.builder.build()?;
         let uri = if self.none {
@@ -317,13 +317,13 @@ impl<'r> UriBuilder for AdminUserPermissionResourceUriBuilder<'r> {
 }
 
 #[derive(Debug, Clone)]
-pub struct AdminMailServerResourceUriBuilder<'r> {
-    builder: AdminResourceUriBuilder<'r>,
+pub struct AdminMailServerUriBuilder<'r> {
+    builder: AdminUriBuilder<'r>,
     sender_address: bool,
 }
 
-impl<'r> AdminMailServerResourceUriBuilder<'r> {
-    pub fn new(builder: AdminResourceUriBuilder<'r>) -> Self {
+impl<'r> AdminMailServerUriBuilder<'r> {
+    pub fn new(builder: AdminUriBuilder<'r>) -> Self {
         Self { builder, sender_address: false }
     }
 
@@ -333,7 +333,7 @@ impl<'r> AdminMailServerResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for AdminMailServerResourceUriBuilder<'r> {
+impl<'r> UriBuilder for AdminMailServerUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = self.builder.build()?;
         let uri = if self.sender_address {
@@ -356,12 +356,12 @@ mod tests {
         format!("{}/admin", crate::uri_builders::tests::base_uri())
     }
 
-    fn builder<'a>() -> AdminResourceUriBuilder<'a> {
+    fn builder<'a>() -> AdminUriBuilder<'a> {
         ResourceUriBuilder::default().host(TEST_HOST).admin()
     }
 
     #[test]
-    fn admin_resource_uri_works() {
+    fn admin_uri_works() {
         let uri = builder().build();
         assert_uri!(uri, base_uri());
     }
@@ -379,7 +379,7 @@ mod tests {
     }
 
     #[test]
-    fn admin_groups_resource_uri_works() {
+    fn admin_groups_uri_works() {
         let uri = builder().groups().build();
         assert_uri!(uri, format!("{}/groups", base_uri()));
     }
@@ -409,7 +409,7 @@ mod tests {
     }
 
     #[test]
-    fn admin_users_resource_uri_works() {
+    fn admin_users_uri_works() {
         let uri = builder().users().build();
         assert_uri!(uri, format!("{}/users", base_uri()));
     }

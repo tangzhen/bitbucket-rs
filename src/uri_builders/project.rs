@@ -1,21 +1,21 @@
-use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, RepositoryResourceUriBuilder};
+use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, RepositoryUriBuilder};
 
 #[derive(Debug, Clone)]
-pub struct ProjectResourceUriBuilder<'r> {
+pub struct ProjectUriBuilder<'r> {
     builder: ResourceUriBuilder<'r>,
 }
 
-impl<'r> ProjectResourceUriBuilder<'r> {
+impl<'r> ProjectUriBuilder<'r> {
     pub fn new(builder: ResourceUriBuilder<'r>) -> Self {
         Self { builder }
     }
 
-    pub fn project(self, project: &'r str) -> WithProjectResourceUriBuilder<'r> {
-        WithProjectResourceUriBuilder::new(self, project)
+    pub fn project(self, project: &'r str) -> WithProjectUriBuilder<'r> {
+        WithProjectUriBuilder::new(self, project)
     }
 }
 
-impl<'r> UriBuilder for ProjectResourceUriBuilder<'r> {
+impl<'r> UriBuilder for ProjectUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/projects", self.builder.build()?);
         Ok(uri)
@@ -23,26 +23,26 @@ impl<'r> UriBuilder for ProjectResourceUriBuilder<'r> {
 }
 
 #[derive(Debug, Clone)]
-pub struct WithProjectResourceUriBuilder<'r> {
-    builder: ProjectResourceUriBuilder<'r>,
+pub struct WithProjectUriBuilder<'r> {
+    builder: ProjectUriBuilder<'r>,
     project: &'r str,
 }
 
-impl<'r> WithProjectResourceUriBuilder<'r> {
-    pub fn new(builder: ProjectResourceUriBuilder<'r>, project: &'r str) -> Self {
+impl<'r> WithProjectUriBuilder<'r> {
+    pub fn new(builder: ProjectUriBuilder<'r>, project: &'r str) -> Self {
         Self { builder, project }
     }
 
-    pub fn avatar(self) -> ProjectAvatarResourceUriBuilder<'r> {
-        ProjectAvatarResourceUriBuilder::new(self)
+    pub fn avatar(self) -> ProjectAvatarUriBuilder<'r> {
+        ProjectAvatarUriBuilder::new(self)
     }
 
-    pub fn repos(self) -> RepositoryResourceUriBuilder<'r> {
-        RepositoryResourceUriBuilder::new(self)
+    pub fn repos(self) -> RepositoryUriBuilder<'r> {
+        RepositoryUriBuilder::new(self)
     }
 }
 
-impl<'r> UriBuilder for WithProjectResourceUriBuilder<'r> {
+impl<'r> UriBuilder for WithProjectUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.project);
         Ok(uri)
@@ -50,17 +50,17 @@ impl<'r> UriBuilder for WithProjectResourceUriBuilder<'r> {
 }
 
 #[derive(Debug, Clone)]
-pub struct ProjectAvatarResourceUriBuilder<'r> {
-    builder: WithProjectResourceUriBuilder<'r>
+pub struct ProjectAvatarUriBuilder<'r> {
+    builder: WithProjectUriBuilder<'r>
 }
 
-impl<'r> ProjectAvatarResourceUriBuilder<'r> {
-    pub fn new(builder: WithProjectResourceUriBuilder<'r>) -> Self {
+impl<'r> ProjectAvatarUriBuilder<'r> {
+    pub fn new(builder: WithProjectUriBuilder<'r>) -> Self {
         Self { builder }
     }
 }
 
-impl<'r> UriBuilder for ProjectAvatarResourceUriBuilder<'r> {
+impl<'r> UriBuilder for ProjectAvatarUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         Ok(format!("{}/avatar.png", self.builder.build()?))
     }
@@ -75,7 +75,7 @@ mod tests {
         format!("{}/projects", crate::uri_builders::tests::base_uri())
     }
 
-    fn builder<'a>() -> WithProjectResourceUriBuilder<'a> {
+    fn builder<'a>() -> WithProjectUriBuilder<'a> {
         ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()

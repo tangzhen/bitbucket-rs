@@ -1,10 +1,10 @@
 use crate::{models::get::Commit, resources::util::*, traits::AsyncRestClient};
 use anyhow::Result;
-use crate::uri_builders::{CommitResourceUriBuilder, ResourceUriBuilder, UriBuilder};
+use crate::uri_builders::{CommitUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct CommitResource<'client, C> {
     client: &'client C,
-    uri_builder: CommitResourceUriBuilder<'client>,
+    uri_builder: CommitUriBuilder<'client>,
 }
 
 impl<'client, C> CommitResource<'client, C>

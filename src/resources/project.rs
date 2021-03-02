@@ -2,11 +2,11 @@ use anyhow::Result;
 use bytes::Bytes;
 
 use crate::{models::{get, post}, resources::util::accumulate_pages, traits::AsyncRestClient};
-use crate::uri_builders::{ProjectResourceUriBuilder, ResourceUriBuilder, UriBuilder};
+use crate::uri_builders::{ProjectUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct ProjectResource<'client, C> {
     client: &'client C,
-    uri_builder: ProjectResourceUriBuilder<'client>,
+    uri_builder: ProjectUriBuilder<'client>,
 }
 
 impl<'client, C> ProjectResource<'client, C>

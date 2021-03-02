@@ -1,4 +1,4 @@
-use crate::uri_builders::{UriBuilder, BuildResult, REST_API_URI, AdminResourceUriBuilder, ProjectResourceUriBuilder};
+use crate::uri_builders::{UriBuilder, BuildResult, REST_API_URI, AdminUriBuilder, ProjectUriBuilder};
 use crate::Scheme;
 
 #[derive(Debug, Clone)]
@@ -27,12 +27,12 @@ impl<'r> ResourceUriBuilder<'r> {
         self
     }
 
-    pub fn admin(self) -> AdminResourceUriBuilder<'r> {
-        AdminResourceUriBuilder::new(self)
+    pub fn admin(self) -> AdminUriBuilder<'r> {
+        AdminUriBuilder::new(self)
     }
 
-    pub fn projects(self) -> ProjectResourceUriBuilder<'r> {
-        ProjectResourceUriBuilder::new(self)
+    pub fn projects(self) -> ProjectUriBuilder<'r> {
+        ProjectUriBuilder::new(self)
     }
 }
 

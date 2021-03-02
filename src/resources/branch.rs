@@ -1,10 +1,10 @@
 use crate::{models::get::Branch, resources::util::*, traits::AsyncRestClient};
 use anyhow::Result;
-use crate::uri_builders::{BranchResourceUriBuilder, ResourceUriBuilder, UriBuilder};
+use crate::uri_builders::{BranchUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct BranchResource<'client, C> {
     client: &'client C,
-    uri_builder: BranchResourceUriBuilder<'client>,
+    uri_builder: BranchUriBuilder<'client>,
 }
 
 impl<'client, C> BranchResource<'client, C>

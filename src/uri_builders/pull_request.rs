@@ -1,22 +1,22 @@
-use crate::uri_builders::{WithRepositoryResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
+use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
 use serde::Serialize;
 
 #[derive(Debug, Clone)]
-pub struct PullRequestResourceUriBuilder<'r> {
-    builder: WithRepositoryResourceUriBuilder<'r>,
+pub struct PullRequestUriBuilder<'r> {
+    builder: WithRepositoryUriBuilder<'r>,
 }
 
-impl<'r> PullRequestResourceUriBuilder<'r> {
-    pub fn new(builder: WithRepositoryResourceUriBuilder<'r>) -> Self {
+impl<'r> PullRequestUriBuilder<'r> {
+    pub fn new(builder: WithRepositoryUriBuilder<'r>) -> Self {
         Self { builder }
     }
 
-    pub fn pull_request(self, pull_request_id: u64) -> WithPullRequestResourceUriBuilder<'r> {
-        WithPullRequestResourceUriBuilder::new(self, pull_request_id)
+    pub fn pull_request(self, pull_request_id: u64) -> WithPullRequestUriBuilder<'r> {
+        WithPullRequestUriBuilder::new(self, pull_request_id)
     }
 }
 
-impl<'r> UriBuilder for PullRequestResourceUriBuilder<'r> {
+impl<'r> UriBuilder for PullRequestUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         Ok(self.builder.build()?)
     }
@@ -40,14 +40,14 @@ enum PullRequestAction {
 }
 
 #[derive(Debug, Clone)]
-pub struct WithPullRequestResourceUriBuilder<'r> {
-    builder: PullRequestResourceUriBuilder<'r>,
+pub struct WithPullRequestUriBuilder<'r> {
+    builder: PullRequestUriBuilder<'r>,
     id: u64,
     action: Option<PullRequestAction>,
 }
 
-impl<'r> WithPullRequestResourceUriBuilder<'r> {
-    pub fn new(builder: PullRequestResourceUriBuilder<'r>, id: u64) -> Self {
+impl<'r> WithPullRequestUriBuilder<'r> {
+    pub fn new(builder: PullRequestUriBuilder<'r>, id: u64) -> Self {
         Self { builder, id, action: None }
     }
 
@@ -81,9 +81,9 @@ impl<'r> WithPullRequestResourceUriBuilder<'r> {
         TerminalUriBuilder::new(self)
     }
 
-    pub fn comments(mut self) -> PullRequestCommentResourceUriBuilder<'r> {
+    pub fn comments(mut self) -> PullRequestCommentUriBuilder<'r> {
         self.action = Some(PullRequestAction::Comments);
-        PullRequestCommentResourceUriBuilder::new(self)
+        PullRequestCommentUriBuilder::new(self)
     }
 
     pub fn commits(mut self) -> TerminalUriBuilder<Self> {
@@ -114,7 +114,7 @@ impl<'r> WithPullRequestResourceUriBuilder<'r> {
     }
 }
 
-impl<'r> UriBuilder for WithPullRequestResourceUriBuilder<'r> {
+impl<'r> UriBuilder for WithPullRequestUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.id);
         let uri = match &self.action {
@@ -130,39 +130,39 @@ impl<'r> UriBuilder for WithPullRequestResourceUriBuilder<'r> {
 }
 
 #[derive(Debug, Clone)]
-pub struct PullRequestCommentResourceUriBuilder<'r> {
-    builder: WithPullRequestResourceUriBuilder<'r>
+pub struct PullRequestCommentUriBuilder<'r> {
+    builder: WithPullRequestUriBuilder<'r>
 }
 
-impl<'r> PullRequestCommentResourceUriBuilder<'r> {
-    pub fn new(builder: WithPullRequestResourceUriBuilder<'r>) -> Self {
+impl<'r> PullRequestCommentUriBuilder<'r> {
+    pub fn new(builder: WithPullRequestUriBuilder<'r>) -> Self {
         Self { builder }
     }
 
-    pub fn comment(self, comment_id: u64) -> WithPullRequestCommentResourceUriBuilder<'r> {
-        WithPullRequestCommentResourceUriBuilder::new(self, comment_id)
+    pub fn comment(self, comment_id: u64) -> WithPullRequestCommentUriBuilder<'r> {
+        WithPullRequestCommentUriBuilder::new(self, comment_id)
     }
 }
 
-impl<'r> UriBuilder for PullRequestCommentResourceUriBuilder<'r> {
+impl<'r> UriBuilder for PullRequestCommentUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         Ok(self.builder.build()?)
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct WithPullRequestCommentResourceUriBuilder<'r> {
-    builder: PullRequestCommentResourceUriBuilder<'r>,
+pub struct WithPullRequestCommentUriBuilder<'r> {
+    builder: PullRequestCommentUriBuilder<'r>,
     comment_id: u64,
 }
 
-impl<'r> WithPullRequestCommentResourceUriBuilder<'r> {
-    pub fn new(builder: PullRequestCommentResourceUriBuilder<'r>, comment_id: u64) -> Self {
+impl<'r> WithPullRequestCommentUriBuilder<'r> {
+    pub fn new(builder: PullRequestCommentUriBuilder<'r>, comment_id: u64) -> Self {
         Self { builder, comment_id }
     }
 }
 
-impl<'r> UriBuilder for WithPullRequestCommentResourceUriBuilder<'r> {
+impl<'r> UriBuilder for WithPullRequestCommentUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.comment_id);
         Ok(uri)
@@ -184,7 +184,7 @@ mod tests {
         )
     }
 
-    fn builder<'a>() -> WithPullRequestResourceUriBuilder<'a> {
+    fn builder<'a>() -> WithPullRequestUriBuilder<'a> {
         ResourceUriBuilder::default()
             .host(TEST_HOST)
             .projects()

@@ -2,18 +2,18 @@ use crate::traits::AsyncRestClient;
 use anyhow::Result;
 use crate::models::get::{PullRequest, PullRequestState};
 use crate::resources::util::accumulate_pages;
-use crate::uri_builders::{PullRequestResourceUriBuilder, ResourceUriBuilder, UriBuilder};
+use crate::uri_builders::{PullRequestUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct PullRequestResource<'client, C> {
     client: &'client C,
-    uri_builder: PullRequestResourceUriBuilder<'client>,
+    uri_builder: PullRequestUriBuilder<'client>,
 }
 
 impl<'client, C> PullRequestResource<'client, C>
     where
         C: AsyncRestClient
 {
-    pub fn new(client: &'client C, project: &str, repository: &str) -> Self {
+    pub fn new(client: &'client C, project: &'client str, repository: &'client str) -> Self {
         let uri_builder = ResourceUriBuilder::default()
             .scheme(client.scheme())
             .host(client.host())

@@ -1,10 +1,10 @@
 use crate::{models::get::{Repository, Tag}, resources::util::*, traits::AsyncRestClient};
 use anyhow::Result;
-use crate::uri_builders::{RepositoryResourceUriBuilder, ResourceUriBuilder, UriBuilder};
+use crate::uri_builders::{RepositoryUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct RepositoryResource<'client, C> {
     client: &'client C,
-    uri_builder: RepositoryResourceUriBuilder<'client>,
+    uri_builder: RepositoryUriBuilder<'client>,
 }
 
 impl<'client, C> RepositoryResource<'client, C>
