@@ -1,4 +1,4 @@
-use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
+use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -27,15 +27,8 @@ impl<'r> AdminUriBuilder<'r> {
         AdminMailServerUriBuilder::new(self)
     }
 
-    #[named]
-    pub fn cluster(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn licence(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(cluster);
+    terminal_resource_fn!(licence);
 }
 
 impl<'r> UriBuilder for AdminUriBuilder<'r> {
@@ -55,30 +48,11 @@ impl<'r> AdminGroupUriBuilder<'r> {
         Self { builder }
     }
 
-    #[named]
-    pub fn add_user(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn add_users(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn more_members(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn more_non_members(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn remove_user(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(add_user);
+    terminal_resource_fn!(add_users);
+    terminal_resource_fn!(more_members);
+    terminal_resource_fn!(more_non_members);
+    terminal_resource_fn!(remove_user);
 }
 
 impl<'r> UriBuilder for AdminGroupUriBuilder<'r> {
@@ -98,45 +72,14 @@ impl<'r> AdminUserUriBuilder<'r> {
         Self { builder }
     }
 
-    #[named]
-    pub fn add_group(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn add_groups(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn captcha(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn credentials(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn more_members(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn more_non_members(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn remove_group(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn rename(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(add_group);
+    terminal_resource_fn!(add_groups);
+    terminal_resource_fn!(captcha);
+    terminal_resource_fn!(credentials);
+    terminal_resource_fn!(more_members);
+    terminal_resource_fn!(more_non_members);
+    terminal_resource_fn!(remove_group);
+    terminal_resource_fn!(rename);
 }
 
 impl<'r> UriBuilder for AdminUserUriBuilder<'r> {
@@ -182,10 +125,7 @@ impl<'r> AdminGroupPermissionUriBuilder<'r> {
         Self { builder }
     }
 
-    #[named]
-    pub fn none(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(none);
 }
 
 impl<'r> UriBuilder for AdminGroupPermissionUriBuilder<'r> {
@@ -205,10 +145,7 @@ impl<'r> AdminUserPermissionUriBuilder<'r> {
         Self { builder }
     }
 
-    #[named]
-    pub fn none(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(none);
 }
 
 impl<'r> UriBuilder for AdminUserPermissionUriBuilder<'r> {
@@ -228,10 +165,7 @@ impl<'r> AdminMailServerUriBuilder<'r> {
         Self { builder }
     }
 
-    #[named]
-    pub fn sender_address(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(sender_address);
 }
 
 impl<'r> UriBuilder for AdminMailServerUriBuilder<'r> {

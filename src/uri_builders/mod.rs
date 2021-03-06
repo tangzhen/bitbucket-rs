@@ -72,6 +72,15 @@ macro_rules! terminal_uri_builder {
     }}
 }
 
+macro_rules! terminal_resource_fn {
+    ($fn_name:ident) => {
+        #[named]
+        pub fn $fn_name(self) -> crate::uri_builders::TerminalUriBuilder<Self> {
+            terminal_uri_builder!(self)
+        }
+    }
+}
+
 
 #[cfg(test)]
 #[macro_use]

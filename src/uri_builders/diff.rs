@@ -10,7 +10,7 @@ impl<B> DiffUriBuilder<B> where B: UriBuilder {
         Self { builder }
     }
 
-    pub fn path<'r>(self, path: &'r str) -> WithDiffPathUriBuilder<'r, B> {
+    pub fn path(self, path: &str) -> WithDiffPathUriBuilder<B> {
         WithDiffPathUriBuilder::new(self, path)
     }
 }

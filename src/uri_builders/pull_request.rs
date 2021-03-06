@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, DiffUriBuilder};
+use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, DiffUriBuilder};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -34,64 +34,24 @@ impl<'r> WithPullRequestUriBuilder<'r> {
         Self { builder, id }
     }
 
-    #[named]
-    pub fn activities(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn decline(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn merge(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn reopen(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn approve(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn changes(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
+    pub fn diff(self) -> DiffUriBuilder<Self> {
+        DiffUriBuilder::new(self)
     }
 
     pub fn comments(self) -> PullRequestCommentUriBuilder<'r> {
         PullRequestCommentUriBuilder::new(self)
     }
 
-    #[named]
-    pub fn commits(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    pub fn diff(self) -> DiffUriBuilder<Self> {
-        DiffUriBuilder::new(self)
-    }
-
-    #[named]
-    pub fn participants(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    // TODO: This needs a separate type
-    #[named]
-    pub fn tasks(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn watch(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(activities);
+    terminal_resource_fn!(decline);
+    terminal_resource_fn!(merge);
+    terminal_resource_fn!(reopen);
+    terminal_resource_fn!(approve);
+    terminal_resource_fn!(changes);
+    terminal_resource_fn!(commits);
+    terminal_resource_fn!(participants);
+    terminal_resource_fn!(tasks); // TODO: separate type
+    terminal_resource_fn!(watch);
 }
 
 impl<'r> UriBuilder for WithPullRequestUriBuilder<'r> {

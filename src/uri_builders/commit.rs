@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, DiffUriBuilder};
+use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, DiffUriBuilder};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -34,25 +34,13 @@ impl<'r> WithCommitUriBuilder<'r> {
         Self { builder, commit_id }
     }
 
-    #[named]
-    pub fn changes(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    // TODO: This need a different type
-    #[named]
-    pub fn comments(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
     pub fn diff(self) -> DiffUriBuilder<Self> {
         DiffUriBuilder::new(self)
     }
 
-    #[named]
-    pub fn watch(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(changes);
+    terminal_resource_fn!(comments);
+    terminal_resource_fn!(watch);
 }
 
 impl<'r> UriBuilder for WithCommitUriBuilder<'r> {

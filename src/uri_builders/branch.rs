@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, TerminalUriBuilder, UriBuilder, BuildResult};
+use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -11,10 +11,7 @@ impl<'r> BranchUriBuilder<'r> {
         Self { builder }
     }
 
-    #[named]
-    pub fn default(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(default);
 }
 
 impl<'r> UriBuilder for BranchUriBuilder<'r> {

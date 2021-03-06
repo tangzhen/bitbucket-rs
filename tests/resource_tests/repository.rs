@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use crate::common;
 use httpmock::{MockServer, Method::{GET, POST, PUT, DELETE}};
 use bitbucket_rs::{

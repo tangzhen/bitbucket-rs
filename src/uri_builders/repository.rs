@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder, DiffUriBuilder};
+use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder, DiffUriBuilder};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -34,69 +34,30 @@ impl<'r> WithRepositoryUriBuilder<'r> {
         Self { builder, repo }
     }
 
-    #[named]
-    pub fn forks(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn recreate(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn related(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
+    terminal_resource_fn!(forks);
+    terminal_resource_fn!(recreate);
+    terminal_resource_fn!(related);
+    terminal_resource_fn!(browse);      // TODO: separate type
+    terminal_resource_fn!(changes);
+    terminal_resource_fn!(compare);     // TODO: separate type
+    terminal_resource_fn!(files);       // TODO: separate type
+    terminal_resource_fn!(permissions); // TODO: separate type
+    terminal_resource_fn!(tags);
 
     pub fn branches(self) -> BranchUriBuilder<'r> {
         BranchUriBuilder::new(self)
-    }
-
-    // TODO: This needs another type
-    #[named]
-    pub fn browse(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    #[named]
-    pub fn changes(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
     }
 
     pub fn commits(self) -> CommitUriBuilder<'r> {
         CommitUriBuilder::new(self)
     }
 
-    // TODO: This needs another type
-    #[named]
-    pub fn compare(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
     pub fn diff(self) -> DiffUriBuilder<Self> {
         DiffUriBuilder::new(self)
     }
 
-    // TODO: This needs another type
-    #[named]
-    pub fn files(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
-    // TODO: This needs another type
-    #[named]
-    pub fn permissions(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
-    }
-
     pub fn pull_requests(self) -> PullRequestUriBuilder<'r> {
         PullRequestUriBuilder::new(self)
-    }
-
-    #[named]
-    pub fn tags(self) -> TerminalUriBuilder<Self> {
-        terminal_uri_builder!(self)
     }
 }
 
