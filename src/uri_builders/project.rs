@@ -1,4 +1,14 @@
-use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, RepositoryUriBuilder};
+use crate::uri_builders::{
+    ResourceUriBuilder,
+    UriBuilder,
+    BuildResult,
+    RepositoryUriBuilder,
+    PermissionUriBuilder,
+    GroupPermissionUriBuilder,
+    UserPermissionUriBuilder,
+};
+use function_name::named;
+
 
 #[derive(Debug, Clone)]
 pub struct ProjectUriBuilder<'r> {
@@ -40,6 +50,10 @@ impl<'r> WithProjectUriBuilder<'r> {
     pub fn repos(self) -> RepositoryUriBuilder<'r> {
         RepositoryUriBuilder::new(self)
     }
+
+    pub fn permissions(self) -> ProjectPermissionsUriBuilder<'r> {
+        ProjectPermissionsUriBuilder::new(self)
+    }
 }
 
 impl<'r> UriBuilder for WithProjectUriBuilder<'r> {
@@ -66,13 +80,65 @@ impl<'r> UriBuilder for ProjectAvatarUriBuilder<'r> {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct ProjectPermissionsUriBuilder<'r> {
+    builder: PermissionUriBuilder<WithProjectUriBuilder<'r>>,
+}
+
+impl<'r> ProjectPermissionsUriBuilder<'r> {
+    pub fn new(builder: WithProjectUriBuilder<'r>) -> Self {
+        let builder = PermissionUriBuilder::new(builder);
+        Self { builder }
+    }
+
+    pub fn groups(self) -> GroupPermissionUriBuilder<WithProjectUriBuilder<'r>> {
+        self.builder.groups()
+    }
+
+    pub fn users(self) -> UserPermissionUriBuilder<WithProjectUriBuilder<'r>> {
+        self.builder.users()
+    }
+
+    pub fn permission(self, perm: &'r str) -> WithProjectPermissionUriBuilder<'r> {
+        WithProjectPermissionUriBuilder::new(self, perm)
+    }
+}
+
+impl<'r> UriBuilder for ProjectPermissionsUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        self.builder.build()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct WithProjectPermissionUriBuilder<'r> {
+    builder: ProjectPermissionsUriBuilder<'r>,
+    permission: &'r str,
+}
+
+impl<'r> WithProjectPermissionUriBuilder<'r> {
+    pub fn new(builder: ProjectPermissionsUriBuilder<'r>, permission: &'r str) -> Self {
+        Self { builder, permission }
+    }
+
+    terminal_resource_fn!(all);
+}
+
+impl<'r> UriBuilder for WithProjectPermissionUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/{}", self.builder.build()?, self.permission);
+        Ok(uri)
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT};
+    use crate::uri_builders::tests::{self, TEST_HOST, TEST_PROJECT};
 
     fn base_uri() -> String {
-        format!("{}/projects", crate::uri_builders::tests::base_uri())
+        format!("{}/projects/{}", tests::base_uri(), TEST_PROJECT)
     }
 
     fn builder<'a>() -> WithProjectUriBuilder<'a> {
@@ -85,18 +151,48 @@ mod tests {
     #[test]
     fn project_resource_uri_works() {
         let uri = ResourceUriBuilder::default().host(TEST_HOST).projects().build();
-        assert_uri!(uri, base_uri());
+        assert_uri!(uri, format!("{}/projects", tests::base_uri()));
     }
 
     #[test]
     fn with_project_uri_works() {
         let uri = builder().build();
-        assert_uri!(uri, format!("{}/{}", base_uri(), TEST_PROJECT));
+        assert_uri!(uri, base_uri());
     }
 
     #[test]
     fn with_project_avatar_works() {
         let uri = builder().avatar().build();
-        assert_uri!(uri, format!("{}/{}/avatar.png", base_uri(), TEST_PROJECT));
+        assert_uri!(uri, format!("{}/avatar.png", base_uri()));
+    }
+
+    #[test]
+    fn project_permissions_uri_works() {
+        let uri = builder().permissions().build();
+        assert_uri!(uri, format!("{}/permissions", base_uri()));
+    }
+
+    #[test]
+    fn project_group_permissions_uri_works() {
+        let uri = builder().permissions().groups().build();
+        assert_uri!(uri, format!("{}/permissions/groups", base_uri()));
+    }
+
+    #[test]
+    fn project_user_permissions_uri_works() {
+        let uri = builder().permissions().users().build();
+        assert_uri!(uri, format!("{}/permissions/users", base_uri()));
+    }
+
+    #[test]
+    fn with_project_permission_uri_works() {
+        let uri = builder().permissions().permission("REPO_READ").build();
+        assert_uri!(uri, format!("{}/permissions/REPO_READ", base_uri()));
+    }
+
+    #[test]
+    fn with_project_permission_all_uri_works() {
+        let uri = builder().permissions().permission("REPO_READ").all().build();
+        assert_uri!(uri, format!("{}/permissions/REPO_READ/all", base_uri()));
     }
 }

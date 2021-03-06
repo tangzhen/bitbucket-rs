@@ -111,6 +111,7 @@ mod branch;
 mod commit;
 mod pull_request;
 mod diff;
+mod permission;
 
 pub use resource::*;
 pub use admin::*;
@@ -120,5 +121,6 @@ pub use branch::*;
 pub use commit::*;
 pub use pull_request::*;
 pub use diff::*;
+pub use permission::*;
 use std::fmt::Formatter;
 use std::error::Error;

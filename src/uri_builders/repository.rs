@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder, DiffUriBuilder};
+use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder, DiffUriBuilder, PermissionUriBuilder};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -41,7 +41,6 @@ impl<'r> WithRepositoryUriBuilder<'r> {
     terminal_resource_fn!(changes);
     terminal_resource_fn!(compare);     // TODO: separate type
     terminal_resource_fn!(files);       // TODO: separate type
-    terminal_resource_fn!(permissions); // TODO: separate type
     terminal_resource_fn!(tags);
 
     pub fn branches(self) -> BranchUriBuilder<'r> {
@@ -58,6 +57,10 @@ impl<'r> WithRepositoryUriBuilder<'r> {
 
     pub fn pull_requests(self) -> PullRequestUriBuilder<'r> {
         PullRequestUriBuilder::new(self)
+    }
+
+    pub fn permissions(self) -> PermissionUriBuilder<Self> {
+        PermissionUriBuilder::new(self)
     }
 }
 
@@ -122,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    fn repo_relate_uri_works() {
+    fn repo_related_uri_works() {
         let uri = builder().related().build();
         assert_uri!(uri, format_repo_uri("related"));
     }
@@ -137,5 +140,11 @@ mod tests {
     fn repo_tags_uri_works() {
         let uri = builder().tags().build();
         assert_uri!(uri, format_repo_uri("tags"));
+    }
+
+    #[test]
+    fn repo_permissions_uri_works() {
+        let uri = builder().permissions().build();
+        assert_uri!(uri, format_repo_uri("permissions"));
     }
 }

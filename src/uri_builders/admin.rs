@@ -1,4 +1,4 @@
-use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult};
+use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, PermissionUriBuilder};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -19,8 +19,8 @@ impl<'r> AdminUriBuilder<'r> {
         AdminUserUriBuilder::new(self)
     }
 
-    pub fn permissions(self) -> AdminPermissionsUriBuilder<'r> {
-        AdminPermissionsUriBuilder::new(self)
+    pub fn permissions(self) -> PermissionUriBuilder<Self> {
+        PermissionUriBuilder::new(self)
     }
 
     pub fn mail_server(self) -> AdminMailServerUriBuilder<'r> {
@@ -83,72 +83,6 @@ impl<'r> AdminUserUriBuilder<'r> {
 }
 
 impl<'r> UriBuilder for AdminUserUriBuilder<'r> {
-    fn build(&self) -> BuildResult {
-        let uri = format!("{}/users", self.builder.build()?);
-        Ok(uri)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct AdminPermissionsUriBuilder<'r> {
-    builder: AdminUriBuilder<'r>,
-}
-
-impl<'r> AdminPermissionsUriBuilder<'r> {
-    pub fn new(builder: AdminUriBuilder<'r>) -> Self {
-        Self { builder }
-    }
-
-    pub fn groups(self) -> AdminGroupPermissionUriBuilder<'r> {
-        AdminGroupPermissionUriBuilder::new(self)
-    }
-
-    pub fn users(self) -> AdminUserPermissionUriBuilder<'r> {
-        AdminUserPermissionUriBuilder::new(self)
-    }
-}
-
-impl<'r> UriBuilder for AdminPermissionsUriBuilder<'r> {
-    fn build(&self) -> BuildResult {
-        let uri = format!("{}/permissions", self.builder.build()?);
-        Ok(uri)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct AdminGroupPermissionUriBuilder<'r> {
-    builder: AdminPermissionsUriBuilder<'r>,
-}
-
-impl<'r> AdminGroupPermissionUriBuilder<'r> {
-    pub fn new(builder: AdminPermissionsUriBuilder<'r>) -> Self {
-        Self { builder }
-    }
-
-    terminal_resource_fn!(none);
-}
-
-impl<'r> UriBuilder for AdminGroupPermissionUriBuilder<'r> {
-    fn build(&self) -> BuildResult {
-        let uri = format!("{}/groups", self.builder.build()?);
-        Ok(uri)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct AdminUserPermissionUriBuilder<'r> {
-    builder: AdminPermissionsUriBuilder<'r>,
-}
-
-impl<'r> AdminUserPermissionUriBuilder<'r> {
-    pub fn new(builder: AdminPermissionsUriBuilder<'r>) -> Self {
-        Self { builder }
-    }
-
-    terminal_resource_fn!(none);
-}
-
-impl<'r> UriBuilder for AdminUserPermissionUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/users", self.builder.build()?);
         Ok(uri)
