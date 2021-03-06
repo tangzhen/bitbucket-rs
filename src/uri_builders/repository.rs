@@ -141,10 +141,4 @@ mod tests {
         let uri = builder().tags().build();
         assert_uri!(uri, format_repo_uri("tags"));
     }
-
-    #[test]
-    fn repo_permissions_uri_works() {
-        let uri = builder().permissions().build();
-        assert_uri!(uri, format_repo_uri("permissions"));
-    }
 }
