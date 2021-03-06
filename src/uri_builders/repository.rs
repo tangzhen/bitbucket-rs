@@ -1,6 +1,5 @@
-use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder};
-use serde::Serialize;
-use serde_plain;
+use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder, DiffUriBuilder};
+use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct RepositoryUriBuilder<'r> {
@@ -24,118 +23,86 @@ impl<'r> UriBuilder for RepositoryUriBuilder<'r> {
     }
 }
 
-#[derive(Debug, Serialize, Clone)]
-#[serde(rename_all = "kebab-case")]
-enum RepositoryAction {
-    Forks,
-    Recreate,
-    Related,
-    Branches,
-    Browse,
-    Changes,
-    Commits,
-    Compare,
-    Diff,
-    Files,
-    Permissions,
-    PullRequests,
-    Tags,
-}
-
 #[derive(Debug, Clone)]
 pub struct WithRepositoryUriBuilder<'r> {
     builder: RepositoryUriBuilder<'r>,
     repo: &'r str,
-    action: Option<RepositoryAction>,
 }
 
 impl<'r> WithRepositoryUriBuilder<'r> {
     pub fn new(builder: RepositoryUriBuilder<'r>, repo: &'r str) -> Self {
-        Self { builder, repo, action: None }
+        Self { builder, repo }
     }
 
-    pub fn forks(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Forks);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn forks(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn recreate(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Recreate);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn recreate(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn related(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Related);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn related(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn branches(mut self) -> BranchUriBuilder<'r> {
-        self.action = Some(RepositoryAction::Branches);
+    pub fn branches(self) -> BranchUriBuilder<'r> {
         BranchUriBuilder::new(self)
     }
 
     // TODO: This needs another type
-    pub fn browse(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Browse);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn browse(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn changes(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Changes);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn changes(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn commits(mut self) -> CommitUriBuilder<'r> {
-        self.action = Some(RepositoryAction::Commits);
+    pub fn commits(self) -> CommitUriBuilder<'r> {
         CommitUriBuilder::new(self)
     }
 
     // TODO: This needs another type
-    pub fn compare(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Compare);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn compare(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
+    }
+
+    pub fn diff(self) -> DiffUriBuilder<Self> {
+        DiffUriBuilder::new(self)
     }
 
     // TODO: This needs another type
-    pub fn diff(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Diff);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn files(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
     // TODO: This needs another type
-    pub fn files(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Files);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn permissions(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    // TODO: This needs another type
-    pub fn permissions(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Permissions);
-        TerminalUriBuilder::new(self)
-    }
-
-    pub fn pull_requests(mut self) -> PullRequestUriBuilder<'r> {
-        self.action = Some(RepositoryAction::PullRequests);
+    pub fn pull_requests(self) -> PullRequestUriBuilder<'r> {
         PullRequestUriBuilder::new(self)
     }
 
-    pub fn tags(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(RepositoryAction::Tags);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn tags(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for WithRepositoryUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.repo);
-        let uri = match &self.action {
-            None => uri,
-            Some(action) => {
-                let action = serde_plain::to_string(action).unwrap();
-                format!("{}/{}", uri, action)
-            }
-        };
-
         Ok(uri)
     }
 }

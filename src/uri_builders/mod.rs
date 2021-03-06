@@ -45,21 +45,33 @@ pub trait UriBuilder {
 
 #[derive(Debug)]
 pub struct TerminalUriBuilder<B> {
-    builder: B
+    builder: B,
+    resource: String,
 }
 
-impl<B> TerminalUriBuilder<B>
+impl<'r, B> TerminalUriBuilder<B>
     where
         B: UriBuilder
 {
-    pub fn new(builder: B) -> Self {
-        Self { builder }
-    }
-
-    pub fn build(&self) -> BuildResult {
-        self.builder.build()
+    pub fn new(builder: B, resource: String) -> Self {
+        Self { builder, resource }
     }
 }
+
+impl<B> UriBuilder for TerminalUriBuilder<B> where B: UriBuilder {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/{}", self.builder.build()?, self.resource);
+        Ok(uri)
+    }
+}
+
+macro_rules! terminal_uri_builder {
+    ($builder:expr) => {{
+        let function_name = heck::KebabCase::to_kebab_case(function_name!());
+        crate::uri_builders::TerminalUriBuilder::new($builder, function_name)
+    }}
+}
+
 
 #[cfg(test)]
 #[macro_use]
@@ -89,6 +101,7 @@ mod repository;
 mod branch;
 mod commit;
 mod pull_request;
+mod diff;
 
 pub use resource::*;
 pub use admin::*;
@@ -97,5 +110,6 @@ pub use repository::*;
 pub use branch::*;
 pub use commit::*;
 pub use pull_request::*;
+pub use diff::*;
 use std::fmt::Formatter;
 use std::error::Error;

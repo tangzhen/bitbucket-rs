@@ -1,7 +1,5 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
-use serde::Serialize;
-use serde_plain;
-use crate::models::get::Commit;
+use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, DiffUriBuilder};
+use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct CommitUriBuilder<'r> {
@@ -20,65 +18,46 @@ impl<'r> CommitUriBuilder<'r> {
 
 impl<'r> UriBuilder for CommitUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        Ok(self.builder.build()?)
+        let uri = format!("{}/commits", self.builder.build()?);
+        Ok(uri)
     }
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "kebab-case")]
-enum CommitAction {
-    Changes,
-    Comments,
-    Diff,
-    Watch,
 }
 
 #[derive(Debug, Clone)]
 pub struct WithCommitUriBuilder<'r> {
     builder: CommitUriBuilder<'r>,
     commit_id: &'r str,
-    action: Option<CommitAction>,
 }
 
 impl<'r> WithCommitUriBuilder<'r> {
     pub fn new(builder: CommitUriBuilder<'r>, commit_id: &'r str) -> Self {
-        Self { builder, commit_id, action: None }
+        Self { builder, commit_id }
     }
 
-    pub fn changes(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(CommitAction::Changes);
-        TerminalUriBuilder::new(self)
-    }
-
-    // TODO: This need a different type
-    pub fn comments(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(CommitAction::Comments);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn changes(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
     // TODO: This need a different type
-    pub fn diff(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(CommitAction::Diff);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn comments(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn watch(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(CommitAction::Watch);
-        TerminalUriBuilder::new(self)
+    pub fn diff(self) -> DiffUriBuilder<Self> {
+        DiffUriBuilder::new(self)
+    }
+
+    #[named]
+    pub fn watch(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for WithCommitUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.commit_id);
-        let uri = match &self.action {
-            None => uri,
-            Some(action) => {
-                let action = serde_plain::to_string(action).unwrap();
-                format!("{}/{}", uri, action)
-            }
-        };
-
         Ok(uri)
     }
 }

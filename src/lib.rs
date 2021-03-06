@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate derive_builder;
+extern crate function_name;
 extern crate async_trait;
 
 pub mod auth;

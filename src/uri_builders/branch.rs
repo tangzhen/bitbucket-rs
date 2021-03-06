@@ -1,31 +1,25 @@
 use crate::uri_builders::{WithRepositoryUriBuilder, TerminalUriBuilder, UriBuilder, BuildResult};
+use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct BranchUriBuilder<'r> {
     builder: WithRepositoryUriBuilder<'r>,
-    default: bool,
 }
 
 impl<'r> BranchUriBuilder<'r> {
     pub fn new(builder: WithRepositoryUriBuilder<'r>) -> Self {
-        Self { builder, default: false }
+        Self { builder }
     }
 
-    pub fn default(mut self) -> TerminalUriBuilder<Self> {
-        self.default = true;
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn default(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for BranchUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
-        let uri = if self.default {
-            format!("{}/default", uri)
-        } else {
-            uri
-        };
-
+        let uri = format!("{}/branches", self.builder.build()?);
         Ok(uri)
     }
 }

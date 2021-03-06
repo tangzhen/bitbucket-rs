@@ -1,257 +1,173 @@
 use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
-use serde::Serialize;
-use serde_plain;
-
-#[derive(Debug, Serialize, Clone)]
-#[serde(rename_all = "kebab-case")]
-enum AdminAction {
-    Groups,
-    Users,
-    Permissions,
-    Cluster,
-    Licence,
-    MailServer,
-}
+use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct AdminUriBuilder<'r> {
     builder: ResourceUriBuilder<'r>,
-    action: Option<AdminAction>,
 }
 
 impl<'r> AdminUriBuilder<'r> {
     pub fn new(builder: ResourceUriBuilder<'r>) -> Self {
-        Self { builder, action: None }
+        Self { builder }
     }
 
-    pub fn groups(mut self) -> AdminGroupUriBuilder<'r> {
-        self.action = Some(AdminAction::Groups);
+    pub fn groups(self) -> AdminGroupUriBuilder<'r> {
         AdminGroupUriBuilder::new(self)
     }
 
-    pub fn users(mut self) -> AdminUserUriBuilder<'r> {
-        self.action = Some(AdminAction::Users);
+    pub fn users(self) -> AdminUserUriBuilder<'r> {
         AdminUserUriBuilder::new(self)
     }
 
-    pub fn permissions(mut self) -> AdminPermissionsUriBuilder<'r> {
-        self.action = Some(AdminAction::Permissions);
+    pub fn permissions(self) -> AdminPermissionsUriBuilder<'r> {
         AdminPermissionsUriBuilder::new(self)
     }
 
-    pub fn mail_server(mut self) -> AdminMailServerUriBuilder<'r> {
-        self.action = Some(AdminAction::MailServer);
+    pub fn mail_server(self) -> AdminMailServerUriBuilder<'r> {
         AdminMailServerUriBuilder::new(self)
     }
 
-    pub fn cluster(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminAction::Cluster);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn cluster(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn licence(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminAction::Licence);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn licence(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for AdminUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/admin", self.builder.build()?);
-        let uri = match &self.action {
-            None => uri,
-            Some(action) => {
-                let action = serde_plain::to_string(&action).unwrap();
-                format!("{}/{}", uri, action)
-            }
-        };
-
         Ok(uri)
     }
-}
-
-#[derive(Debug, Serialize, Clone)]
-#[serde(rename_all = "kebab-case")]
-enum AdminGroupAction {
-    AddUser,
-    AddUsers,
-    MoreMembers,
-    MoreNonMembers,
-    RemoveUser,
 }
 
 #[derive(Debug, Clone)]
 pub struct AdminGroupUriBuilder<'r> {
     builder: AdminUriBuilder<'r>,
-    action: Option<AdminGroupAction>,
 }
 
 impl<'r> AdminGroupUriBuilder<'r> {
     pub fn new(builder: AdminUriBuilder<'r>) -> Self {
-        Self { builder, action: None }
+        Self { builder }
     }
 
-    pub fn add_user(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminGroupAction::AddUser);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn add_user(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn add_users(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminGroupAction::AddUsers);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn add_users(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn more_members(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminGroupAction::MoreMembers);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn more_members(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn more_non_members(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminGroupAction::MoreNonMembers);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn more_non_members(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn remove_user(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminGroupAction::RemoveUser);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn remove_user(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for AdminGroupUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
-        let uri = match &self.action {
-            None => uri,
-            Some(action) => {
-                let action = serde_plain::to_string(&action).unwrap();
-                format!("{}/{}", uri, action)
-            }
-        };
-
+        let uri = format!("{}/groups", self.builder.build()?);
         Ok(uri)
     }
-}
-
-#[derive(Debug, Serialize, Clone)]
-#[serde(rename_all = "kebab-case")]
-enum AdminUserAction {
-    AddGroup,
-    AddGroups,
-    Captcha,
-    Credentials,
-    MoreMembers,
-    MoreNonMembers,
-    RemoveGroup,
-    Rename,
 }
 
 #[derive(Debug, Clone)]
 pub struct AdminUserUriBuilder<'r> {
     builder: AdminUriBuilder<'r>,
-    action: Option<AdminUserAction>,
 }
 
 impl<'r> AdminUserUriBuilder<'r> {
     pub fn new(builder: AdminUriBuilder<'r>) -> Self {
-        Self { builder, action: None }
+        Self { builder }
     }
 
-    pub fn add_group(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::AddGroup);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn add_group(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn add_groups(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::AddGroups);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn add_groups(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn captcha(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::Captcha);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn captcha(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn credentials(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::Credentials);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn credentials(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn more_members(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::MoreMembers);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn more_members(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn more_non_members(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::MoreNonMembers);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn more_non_members(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn remove_group(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::RemoveGroup);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn remove_group(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn rename(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(AdminUserAction::Rename);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn rename(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for AdminUserUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
-        let uri = match &self.action {
-            None => uri,
-            Some(action) => {
-                let action = serde_plain::to_string(&action).unwrap();
-                format!("{}/{}", uri, action)
-            }
-        };
-
+        let uri = format!("{}/users", self.builder.build()?);
         Ok(uri)
     }
-}
-
-#[derive(Debug, Serialize, Clone)]
-#[serde(rename_all = "kebab-case")]
-enum AdminPermissionAction {
-    Groups,
-    Users,
 }
 
 #[derive(Debug, Clone)]
 pub struct AdminPermissionsUriBuilder<'r> {
     builder: AdminUriBuilder<'r>,
-    action: Option<AdminPermissionAction>,
 }
 
 impl<'r> AdminPermissionsUriBuilder<'r> {
     pub fn new(builder: AdminUriBuilder<'r>) -> Self {
-        Self { builder, action: None }
+        Self { builder }
     }
 
-    pub fn groups(mut self) -> AdminGroupPermissionUriBuilder<'r> {
-        self.action = Some(AdminPermissionAction::Groups);
+    pub fn groups(self) -> AdminGroupPermissionUriBuilder<'r> {
         AdminGroupPermissionUriBuilder::new(self)
     }
 
-    pub fn users(mut self) -> AdminUserPermissionUriBuilder<'r> {
-        self.action = Some(AdminPermissionAction::Users);
+    pub fn users(self) -> AdminUserPermissionUriBuilder<'r> {
         AdminUserPermissionUriBuilder::new(self)
     }
 }
 
 impl<'r> UriBuilder for AdminPermissionsUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
-        let uri = match &self.action {
-            None => uri,
-            Some(action) => {
-                let action = serde_plain::to_string(action).unwrap();
-                format!("{}/{}", uri, action)
-            }
-        };
-
+        let uri = format!("{}/permissions", self.builder.build()?);
         Ok(uri)
     }
 }
@@ -259,29 +175,22 @@ impl<'r> UriBuilder for AdminPermissionsUriBuilder<'r> {
 #[derive(Debug, Clone)]
 pub struct AdminGroupPermissionUriBuilder<'r> {
     builder: AdminPermissionsUriBuilder<'r>,
-    none: bool,
 }
 
 impl<'r> AdminGroupPermissionUriBuilder<'r> {
     pub fn new(builder: AdminPermissionsUriBuilder<'r>) -> Self {
-        Self { builder, none: false }
+        Self { builder }
     }
 
-    pub fn none(mut self) -> TerminalUriBuilder<Self> {
-        self.none = true;
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn none(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for AdminGroupPermissionUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
-        let uri = if self.none {
-            format!("{}/none", uri)
-        } else {
-            uri
-        };
-
+        let uri = format!("{}/groups", self.builder.build()?);
         Ok(uri)
     }
 }
@@ -289,29 +198,22 @@ impl<'r> UriBuilder for AdminGroupPermissionUriBuilder<'r> {
 #[derive(Debug, Clone)]
 pub struct AdminUserPermissionUriBuilder<'r> {
     builder: AdminPermissionsUriBuilder<'r>,
-    none: bool,
 }
 
 impl<'r> AdminUserPermissionUriBuilder<'r> {
     pub fn new(builder: AdminPermissionsUriBuilder<'r>) -> Self {
-        Self { builder, none: false }
+        Self { builder }
     }
 
-    pub fn none(mut self) -> TerminalUriBuilder<Self> {
-        self.none = true;
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn none(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for AdminUserPermissionUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
-        let uri = if self.none {
-            format!("{}/none", uri)
-        } else {
-            uri
-        };
-
+        let uri = format!("{}/users", self.builder.build()?);
         Ok(uri)
     }
 }
@@ -319,29 +221,22 @@ impl<'r> UriBuilder for AdminUserPermissionUriBuilder<'r> {
 #[derive(Debug, Clone)]
 pub struct AdminMailServerUriBuilder<'r> {
     builder: AdminUriBuilder<'r>,
-    sender_address: bool,
 }
 
 impl<'r> AdminMailServerUriBuilder<'r> {
     pub fn new(builder: AdminUriBuilder<'r>) -> Self {
-        Self { builder, sender_address: false }
+        Self { builder }
     }
 
-    pub fn sender_address(mut self) -> TerminalUriBuilder<Self> {
-        self.sender_address = true;
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn sender_address(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for AdminMailServerUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        let uri = self.builder.build()?;
-        let uri = if self.sender_address {
-            format!("{}/sender-address", uri)
-        } else {
-            uri
-        };
-
+        let uri = format!("{}/mail-server", self.builder.build()?);
         Ok(uri)
     }
 }

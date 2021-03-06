@@ -1,5 +1,5 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
-use serde::Serialize;
+use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder, DiffUriBuilder};
+use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct PullRequestUriBuilder<'r> {
@@ -18,113 +18,85 @@ impl<'r> PullRequestUriBuilder<'r> {
 
 impl<'r> UriBuilder for PullRequestUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        Ok(self.builder.build()?)
+        let uri = format!("{}/pull-requests", self.builder.build()?);
+        Ok(uri)
     }
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "kebab-case")]
-enum PullRequestAction {
-    Activities,
-    Decline,
-    Merge,
-    Reopen,
-    Approve,
-    Changes,
-    Comments,
-    Commits,
-    Diff,
-    Participants,
-    Tasks,
-    Watch,
 }
 
 #[derive(Debug, Clone)]
 pub struct WithPullRequestUriBuilder<'r> {
     builder: PullRequestUriBuilder<'r>,
     id: u64,
-    action: Option<PullRequestAction>,
 }
 
 impl<'r> WithPullRequestUriBuilder<'r> {
     pub fn new(builder: PullRequestUriBuilder<'r>, id: u64) -> Self {
-        Self { builder, id, action: None }
+        Self { builder, id }
     }
 
-    pub fn activities(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Activities);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn activities(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn decline(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Decline);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn decline(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn merge(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Merge);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn merge(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn reopen(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Reopen);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn reopen(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn approve(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Approve);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn approve(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn changes(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Changes);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn changes(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn comments(mut self) -> PullRequestCommentUriBuilder<'r> {
-        self.action = Some(PullRequestAction::Comments);
+    pub fn comments(self) -> PullRequestCommentUriBuilder<'r> {
         PullRequestCommentUriBuilder::new(self)
     }
 
-    pub fn commits(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Commits);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn commits(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
+    }
+
+    pub fn diff(self) -> DiffUriBuilder<Self> {
+        DiffUriBuilder::new(self)
+    }
+
+    #[named]
+    pub fn participants(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
     // TODO: This needs a separate type
-    pub fn diff(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Diff);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn tasks(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 
-    pub fn participants(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Participants);
-        TerminalUriBuilder::new(self)
-    }
-
-    // TODO: This needs a separate type
-    pub fn tasks(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Tasks);
-        TerminalUriBuilder::new(self)
-    }
-
-    pub fn watch(mut self) -> TerminalUriBuilder<Self> {
-        self.action = Some(PullRequestAction::Watch);
-        TerminalUriBuilder::new(self)
+    #[named]
+    pub fn watch(self) -> TerminalUriBuilder<Self> {
+        terminal_uri_builder!(self)
     }
 }
 
 impl<'r> UriBuilder for WithPullRequestUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.id);
-        let uri = match &self.action {
-            None => uri,
-            Some(action) => {
-                let action = serde_plain::to_string(action).unwrap();
-                format!("{}/{}", uri, action)
-            }
-        };
-
         Ok(uri)
     }
 }
@@ -146,7 +118,8 @@ impl<'r> PullRequestCommentUriBuilder<'r> {
 
 impl<'r> UriBuilder for PullRequestCommentUriBuilder<'r> {
     fn build(&self) -> BuildResult {
-        Ok(self.builder.build()?)
+        let uri = format!("{}/comments", self.builder.build()?);
+        Ok(uri)
     }
 }
 
