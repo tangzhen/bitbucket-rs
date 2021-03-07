@@ -1,6 +1,6 @@
 use std::fmt;
 
-const REST_API_URI: &'static str = "rest/api/1.0";
+const REST_API_URI: &str = "rest/api/1.0";
 
 #[derive(Debug)]
 pub struct BuildError {
