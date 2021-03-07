@@ -1,10 +1,8 @@
 use crate::common;
-use httpmock::{MockServer, Method::{GET, POST, PUT, DELETE}};
-use bitbucket_rs::{
-    models::{
-        get::BitbucketErrors,
-        post,
-    },
+use bitbucket_rs::models::{get::BitbucketErrors, post};
+use httpmock::{
+    Method::{DELETE, GET, POST, PUT},
+    MockServer,
 };
 use serde_json::json;
 
@@ -34,8 +32,7 @@ async fn get_existing_project_works() -> common::Result {
     let path = format!("projects/{}", &project);
 
     ctx.server().mock(|when, then| {
-        when.method(GET)
-            .path(common::format_path(&path));
+        when.method(GET).path(common::format_path(&path));
         then.status(200)
             .header(common::CONTENT_TYPE, common::CONTENT_TYPE_JSON)
             .body(json_project);
@@ -67,7 +64,8 @@ async fn get_all_projects_works() -> common::Result {
         }
     }"#;
 
-    let json_first_page = format!(r#"
+    let json_first_page = format!(
+        r#"
     {{
         "size": 1,
         "limit": 25,
@@ -77,7 +75,9 @@ async fn get_all_projects_works() -> common::Result {
         ],
         "start": 0,
         "nextPageStart": 1
-    }}"#, json_first_project);
+    }}"#,
+        json_first_project
+    );
 
     let json_second_project = r#"{
         "key": "Project2",
@@ -94,7 +94,8 @@ async fn get_all_projects_works() -> common::Result {
         }
     }"#;
 
-    let json_second_page = format!(r#"
+    let json_second_page = format!(
+        r#"
     {{
         "size": 1,
         "limit": 25,
@@ -103,23 +104,20 @@ async fn get_all_projects_works() -> common::Result {
             {}
         ],
         "start": 1
-    }}"#, json_second_project);
+    }}"#,
+        json_second_project
+    );
 
     let path = common::format_path("projects");
 
     ctx.server().mock(|when, then| {
-        when.method(GET)
-            .path(&path)
-            .query_param_exists("start");
-        then.status(200)
-            .body(json_second_page);
+        when.method(GET).path(&path).query_param_exists("start");
+        then.status(200).body(json_second_page);
     });
 
     ctx.server().mock(|when, then| {
-        when.method(GET)
-            .path(&path);
-        then.status(200)
-            .body(json_first_page);
+        when.method(GET).path(&path);
+        then.status(200).body(json_first_page);
     });
 
     let expected_first_project = serde_json::from_str(&json_first_project)?;
@@ -162,10 +160,8 @@ async fn create_project_works() -> common::Result {
     }"#;
 
     ctx.server().mock(|when, then| {
-        when.method(POST)
-            .path(common::format_path("projects"));
-        then.status(201)
-            .body(expected_json_project);
+        when.method(POST).path(common::format_path("projects"));
+        then.status(201).body(expected_json_project);
     });
 
     let expected_project = serde_json::from_str(expected_json_project)?;
@@ -195,15 +191,15 @@ async fn get_non_existent_project_returns_error() -> common::Result {
     ctx.server().mock(|when, then| {
         when.method(GET)
             .path(common::format_path("projects/non_existent"));
-        then.status(404)
-            .body(json_errors);
+        then.status(404).body(json_errors);
     });
 
     let expected_errors: BitbucketErrors = serde_json::from_str(json_errors)?;
     let resp = ctx.resource().get_project("non_existent").await;
     assert!(resp.is_err());
 
-    let errors = resp.as_ref()
+    let errors = resp
+        .as_ref()
         .unwrap_err()
         .downcast_ref::<BitbucketErrors>()
         .unwrap();
@@ -240,10 +236,8 @@ async fn update_project_works() -> common::Result {
     let existing_expected_project = serde_json::from_str(&existing_json_project)?;
 
     ctx.server().mock(|when, then| {
-        when.method(GET)
-            .path(&path);
-        then.status(200)
-            .body(existing_json_project);
+        when.method(GET).path(&path);
+        then.status(200).body(existing_json_project);
     });
 
     *json_project.get_mut("key").unwrap() = json!("EPN");
@@ -251,10 +245,8 @@ async fn update_project_works() -> common::Result {
     let updated_expected_project = serde_json::from_str(&updated_json_project)?;
 
     ctx.server().mock(|when, then| {
-        when.method(PUT)
-            .path(&path);
-        then.status(200)
-            .body(updated_json_project);
+        when.method(PUT).path(&path);
+        then.status(200).body(updated_json_project);
     });
 
     let existing_project = ctx.resource().get_project(project).await?;
@@ -308,8 +300,7 @@ async fn failed_to_delete_returns_error() -> common::Result {
     ctx.server().mock(|when, then| {
         when.method(DELETE)
             .path(common::format_path("projects/test"));
-        then.status(401)
-            .body(errors);
+        then.status(401).body(errors);
     });
 
     let expected_errors = serde_json::from_str(errors)?;

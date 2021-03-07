@@ -1,12 +1,15 @@
-use crate::uri_builders::{UriBuilder, BuildResult, TerminalUriBuilder};
 use crate::uri_builders::path::PathUriBuilder;
+use crate::uri_builders::{BuildResult, TerminalUriBuilder, UriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct DiffUriBuilder<B> {
     builder: PathUriBuilder<'static, B>,
 }
 
-impl<B> DiffUriBuilder<B> where B: UriBuilder {
+impl<B> DiffUriBuilder<B>
+where
+    B: UriBuilder,
+{
     pub fn new(builder: B) -> Self {
         let builder = PathUriBuilder::new(builder, "diff");
         Self { builder }
@@ -17,7 +20,10 @@ impl<B> DiffUriBuilder<B> where B: UriBuilder {
     }
 }
 
-impl<B> UriBuilder for DiffUriBuilder<B> where B: UriBuilder {
+impl<B> UriBuilder for DiffUriBuilder<B>
+where
+    B: UriBuilder,
+{
     fn build(&self) -> BuildResult {
         self.builder.build()
     }

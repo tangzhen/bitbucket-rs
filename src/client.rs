@@ -1,4 +1,9 @@
-use crate::{auth::Authorization, models::get::BitbucketErrors, traits::{AsyncRestClient, Payload}, Scheme};
+use crate::{
+    auth::Authorization,
+    models::get::BitbucketErrors,
+    traits::{AsyncRestClient, Payload},
+    Scheme,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use reqwest::{Client, RequestBuilder, Response};
@@ -19,7 +24,6 @@ impl<R> ApiResult<R> {
         }
     }
 }
-
 
 #[derive(Debug, Builder)]
 pub struct BitbucketClient {
@@ -75,8 +79,8 @@ impl BitbucketClient {
 
     #[inline]
     fn maybe_add_payload<P>(&self, builder: RequestBuilder, payload: Option<&P>) -> RequestBuilder
-        where
-            P: Payload
+    where
+        P: Payload,
     {
         if let Some(payload) = payload {
             builder.json(payload)
@@ -86,8 +90,8 @@ impl BitbucketClient {
     }
 
     async fn perform<F>(&self, method: F) -> Result<Response>
-        where
-            F: Fn() -> RequestBuilder,
+    where
+        F: Fn() -> RequestBuilder,
     {
         let mut builder = method();
         builder = self.maybe_add_auth(builder);
@@ -96,9 +100,9 @@ impl BitbucketClient {
     }
 
     async fn perform_as<T, F>(&self, method: F) -> Result<T>
-        where
-            F: Fn() -> RequestBuilder,
-            T: DeserializeOwned
+    where
+        F: Fn() -> RequestBuilder,
+        T: DeserializeOwned,
     {
         self.perform(method)
             .await?
@@ -114,39 +118,43 @@ impl AsyncRestClient for BitbucketClient {
         &self.host
     }
 
-    fn scheme(&self) -> &Scheme { &self.scheme }
+    fn scheme(&self) -> &Scheme {
+        &self.scheme
+    }
 
     async fn get(&self, uri: &str) -> Result<Response> {
         self.perform(|| self.http_client.get(uri)).await
     }
 
     async fn get_as<T>(&self, uri: &str) -> Result<T>
-        where
-            T: DeserializeOwned,
+    where
+        T: DeserializeOwned,
     {
         self.perform_as(|| self.http_client.get(uri)).await
     }
 
     async fn post<T, P>(&self, uri: &str, payload: Option<P>) -> Result<T>
-        where
-            T: DeserializeOwned,
-            P: Payload,
+    where
+        T: DeserializeOwned,
+        P: Payload,
     {
         self.perform_as(|| {
             let builder = self.http_client.post(uri);
             self.maybe_add_payload(builder, payload.as_ref())
-        }).await
+        })
+        .await
     }
 
     async fn put<T, P>(&self, uri: &str, payload: Option<P>) -> Result<T>
-        where
-            T: DeserializeOwned,
-            P: Payload
+    where
+        T: DeserializeOwned,
+        P: Payload,
     {
         self.perform_as(|| {
             let builder = self.http_client.put(uri);
             self.maybe_add_payload(builder, payload.as_ref())
-        }).await
+        })
+        .await
     }
 
     async fn delete(&self, uri: &str) -> Result<()> {

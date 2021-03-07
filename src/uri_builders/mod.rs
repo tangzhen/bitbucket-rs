@@ -50,15 +50,18 @@ pub struct TerminalUriBuilder<B> {
 }
 
 impl<'r, B> TerminalUriBuilder<B>
-    where
-        B: UriBuilder
+where
+    B: UriBuilder,
 {
     pub fn new(builder: B, resource: String) -> Self {
         Self { builder, resource }
     }
 }
 
-impl<B> UriBuilder for TerminalUriBuilder<B> where B: UriBuilder {
+impl<B> UriBuilder for TerminalUriBuilder<B>
+where
+    B: UriBuilder,
+{
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.resource);
         Ok(uri)
@@ -71,14 +74,13 @@ macro_rules! terminal_resource_fn {
             let function_name = heck::KebabCase::to_kebab_case(std::stringify!($fn_name));
             crate::uri_builders::TerminalUriBuilder::new(self, function_name)
         }
-    }
+    };
 }
-
 
 #[cfg(test)]
 #[macro_use]
 mod tests {
-    use crate::uri_builders::{REST_API_URI, UriBuilder, BuildResult};
+    use crate::uri_builders::{BuildResult, UriBuilder, REST_API_URI};
 
     pub const TEST_HOST: &'static str = "stash.test.com";
     pub const TEST_PROJECT: &'static str = "RRJ";
@@ -100,33 +102,33 @@ mod tests {
         ($uri:expr, $expected:expr) => {
             assert!($uri.is_ok());
             assert_eq!($uri.unwrap(), $expected);
-        }
+        };
     }
 }
 
-mod resource;
 mod admin;
-mod project;
-mod repository;
 mod branch;
-mod commit;
-mod pull_request;
-mod diff;
-mod permission;
-mod path;
 mod browse;
+mod commit;
+mod diff;
 mod file;
+mod path;
+mod permission;
+mod project;
+mod pull_request;
+mod repository;
+mod resource;
 
-pub use resource::*;
 pub use admin::*;
-pub use project::*;
-pub use repository::*;
 pub use branch::*;
-pub use commit::*;
-pub use pull_request::*;
-pub use diff::*;
-pub use permission::*;
 pub use browse::*;
+pub use commit::*;
+pub use diff::*;
 pub use file::*;
-use std::fmt::Formatter;
+pub use permission::*;
+pub use project::*;
+pub use pull_request::*;
+pub use repository::*;
+pub use resource::*;
 use std::error::Error;
+use std::fmt::Formatter;

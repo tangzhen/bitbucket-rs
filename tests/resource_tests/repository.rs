@@ -1,12 +1,10 @@
 #![allow(unused_imports)]
 
 use crate::common;
-use httpmock::{MockServer, Method::{GET, POST, PUT, DELETE}};
-use bitbucket_rs::{
-    models::{
-        get::BitbucketErrors,
-        post,
-    },
+use bitbucket_rs::models::{get::BitbucketErrors, post};
+use httpmock::{
+    Method::{DELETE, GET, POST, PUT},
+    MockServer,
 };
 
 fn get_repo() -> &'static str {
@@ -69,7 +67,8 @@ async fn get_all_repositories_works() -> common::Result {
     let ctx = context!(RepositoryResource, "PRJ");
 
     let json_repo = get_repo();
-    let json_page = format!(r#"
+    let json_page = format!(
+        r#"
     {{
         "size": 1,
         "limit": 25,
@@ -78,17 +77,17 @@ async fn get_all_repositories_works() -> common::Result {
             {}
         ],
         "start": 0
-    }}"#, json_repo);
+    }}"#,
+        json_repo
+    );
 
     let expected_repo = serde_json::from_str(json_repo)?;
 
     let path = common::format_path("projects/PRJ/repos");
 
     ctx.server().mock(|when, then| {
-        when.method(GET)
-            .path(&path);
-        then.status(200)
-            .body(&json_page);
+        when.method(GET).path(&path);
+        then.status(200).body(&json_page);
     });
 
     let repos = ctx.resource().get_all_repositories().await?;
@@ -98,7 +97,6 @@ async fn get_all_repositories_works() -> common::Result {
     Ok(())
 }
 
-
 #[tokio::test]
 async fn get_existing_repo_works() -> common::Result {
     let ctx = context!(RepositoryResource, "PRJ");
@@ -107,10 +105,8 @@ async fn get_existing_repo_works() -> common::Result {
     let path = common::format_path("projects/PRJ/repos/test");
 
     ctx.server().mock(|when, then| {
-        when.method(GET)
-            .path(&path);
-        then.status(200)
-            .body(json_repo);
+        when.method(GET).path(&path);
+        then.status(200).body(json_repo);
     });
 
     let repo = ctx.resource().get_repository("test").await?;

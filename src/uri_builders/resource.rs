@@ -1,4 +1,6 @@
-use crate::uri_builders::{UriBuilder, BuildResult, REST_API_URI, AdminUriBuilder, ProjectUriBuilder};
+use crate::uri_builders::{
+    AdminUriBuilder, BuildResult, ProjectUriBuilder, UriBuilder, REST_API_URI,
+};
 use crate::Scheme;
 
 #[derive(Debug, Clone)]
@@ -51,7 +53,7 @@ impl<'r> UriBuilder for ResourceUriBuilder<'r> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::tests::{TEST_HOST, base_uri};
+    use crate::uri_builders::tests::{base_uri, TEST_HOST};
 
     #[test]
     fn resource_uri_builder_requires_host() {
@@ -68,7 +70,10 @@ mod tests {
 
     #[test]
     fn resource_uri_with_scheme_works() {
-        let uri = ResourceUriBuilder::default().scheme(&Scheme::HTTPS).host(TEST_HOST).build();
+        let uri = ResourceUriBuilder::default()
+            .scheme(&Scheme::HTTPS)
+            .host(TEST_HOST)
+            .build();
         assert_uri!(uri, format!("https://{}/{}", TEST_HOST, REST_API_URI));
     }
 

@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, DiffUriBuilder};
+use crate::uri_builders::{BuildResult, DiffUriBuilder, UriBuilder, WithRepositoryUriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct CommitUriBuilder<'r> {
@@ -52,7 +52,7 @@ impl<'r> UriBuilder for WithCommitUriBuilder<'r> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::tests::{TEST_PROJECT, TEST_REPO, TEST_HOST};
+    use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT, TEST_REPO};
     use crate::uri_builders::ResourceUriBuilder;
 
     fn base_uri() -> String {
@@ -75,7 +75,9 @@ mod tests {
             .commit(commit_id())
     }
 
-    fn commit_id() -> &'static str { "76bf028" }
+    fn commit_id() -> &'static str {
+        "76bf028"
+    }
 
     #[test]
     fn commit_uri_works() {

@@ -1,8 +1,12 @@
 use anyhow::Result;
 use bytes::Bytes;
 
-use crate::{models::{get, post}, resources::util::accumulate_pages, traits::AsyncRestClient};
 use crate::uri_builders::{ProjectUriBuilder, ResourceUriBuilder, UriBuilder};
+use crate::{
+    models::{get, post},
+    resources::util::accumulate_pages,
+    traits::AsyncRestClient,
+};
 
 pub struct ProjectResource<'client, C> {
     client: &'client C,
@@ -10,8 +14,8 @@ pub struct ProjectResource<'client, C> {
 }
 
 impl<'client, C> ProjectResource<'client, C>
-    where
-        C: AsyncRestClient,
+where
+    C: AsyncRestClient,
 {
     pub fn new(client: &'client C) -> Self {
         let uri_builder = ResourceUriBuilder::default()
@@ -19,7 +23,10 @@ impl<'client, C> ProjectResource<'client, C>
             .host(client.host())
             .projects();
 
-        Self { client, uri_builder }
+        Self {
+            client,
+            uri_builder,
+        }
     }
 
     pub async fn get_all_projects(&self) -> Result<Vec<get::Project>> {
@@ -27,7 +34,8 @@ impl<'client, C> ProjectResource<'client, C>
         accumulate_pages(&uri, |uri| {
             let uri = uri.to_owned();
             async move { self.client.get_as(&uri).await }
-        }).await
+        })
+        .await
     }
 
     pub async fn get_project(&self, project: &str) -> Result<get::Project> {
@@ -46,7 +54,11 @@ impl<'client, C> ProjectResource<'client, C>
         self.client.post(&uri, Some(project)).await
     }
 
-    pub async fn update_project(&self, project: &str, payload: &post::Project) -> Result<get::Project> {
+    pub async fn update_project(
+        &self,
+        project: &str,
+        payload: &post::Project,
+    ) -> Result<get::Project> {
         let uri = self.uri_builder.clone().project(project).build()?;
         self.client.put(&uri, Some(payload)).await
     }

@@ -49,15 +49,14 @@ pub struct Link {
 
 #[derive(Debug, Deserialize, Default, Eq, PartialEq)]
 pub struct LinkPart {
-    pub href: String
+    pub href: String,
 }
 
 #[derive(Debug, Deserialize, Default, Eq, PartialEq)]
 pub struct Links {
     #[serde(rename(deserialize = "self"))]
-    pub parts: Vec<LinkPart>
+    pub parts: Vec<LinkPart>,
 }
-
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]
 pub struct PagedResponse<T> {
@@ -171,7 +170,7 @@ pub struct User {
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]
 pub struct PullRequestRefRepoProject {
-    pub key: String
+    pub key: String,
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]

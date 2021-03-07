@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult};
+use crate::uri_builders::{BuildResult, UriBuilder, WithRepositoryUriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct BranchUriBuilder<'r> {
@@ -20,12 +20,11 @@ impl<'r> UriBuilder for BranchUriBuilder<'r> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::ResourceUriBuilder;
     use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT, TEST_REPO};
+    use crate::uri_builders::ResourceUriBuilder;
 
     fn base_uri() -> String {
         format!(

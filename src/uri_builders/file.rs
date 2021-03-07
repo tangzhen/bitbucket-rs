@@ -1,12 +1,15 @@
 use crate::uri_builders::path::PathUriBuilder;
-use crate::uri_builders::{UriBuilder, TerminalUriBuilder, BuildResult};
+use crate::uri_builders::{BuildResult, TerminalUriBuilder, UriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct FileUriBuilder<B> {
-    builder: PathUriBuilder<'static, B>
+    builder: PathUriBuilder<'static, B>,
 }
 
-impl<B> FileUriBuilder<B> where B: UriBuilder {
+impl<B> FileUriBuilder<B>
+where
+    B: UriBuilder,
+{
     pub fn new(builder: B) -> Self {
         let builder = PathUriBuilder::new(builder, "files");
         Self { builder }
@@ -17,7 +20,10 @@ impl<B> FileUriBuilder<B> where B: UriBuilder {
     }
 }
 
-impl<B> UriBuilder for FileUriBuilder<B> where B: UriBuilder {
+impl<B> UriBuilder for FileUriBuilder<B>
+where
+    B: UriBuilder,
+{
     fn build(&self) -> BuildResult {
         self.builder.build()
     }

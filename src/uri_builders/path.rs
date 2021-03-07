@@ -1,4 +1,4 @@
-use crate::uri_builders::{UriBuilder, BuildResult, TerminalUriBuilder};
+use crate::uri_builders::{BuildResult, TerminalUriBuilder, UriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct PathUriBuilder<'r, B> {
@@ -6,7 +6,10 @@ pub struct PathUriBuilder<'r, B> {
     path: &'r str,
 }
 
-impl<'r, B> PathUriBuilder<'r, B> where B: UriBuilder {
+impl<'r, B> PathUriBuilder<'r, B>
+where
+    B: UriBuilder,
+{
     pub fn new(builder: B, path: &'r str) -> Self {
         Self { builder, path }
     }
@@ -16,7 +19,10 @@ impl<'r, B> PathUriBuilder<'r, B> where B: UriBuilder {
     }
 }
 
-impl<'r, B> UriBuilder for PathUriBuilder<'r, B> where B: UriBuilder {
+impl<'r, B> UriBuilder for PathUriBuilder<'r, B>
+where
+    B: UriBuilder,
+{
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.path);
         Ok(uri)

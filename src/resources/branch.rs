@@ -1,6 +1,6 @@
+use crate::uri_builders::{BranchUriBuilder, ResourceUriBuilder, UriBuilder};
 use crate::{models::get::Branch, resources::util::*, traits::AsyncRestClient};
 use anyhow::Result;
-use crate::uri_builders::{BranchUriBuilder, ResourceUriBuilder, UriBuilder};
 
 pub struct BranchResource<'client, C> {
     client: &'client C,
@@ -8,18 +8,23 @@ pub struct BranchResource<'client, C> {
 }
 
 impl<'client, C> BranchResource<'client, C>
-    where
-        C: AsyncRestClient,
+where
+    C: AsyncRestClient,
 {
     pub fn new(client: &'client C, project: &'client str, repository: &'client str) -> Self {
         let uri_builder = ResourceUriBuilder::default()
             .scheme(client.scheme())
             .host(client.host())
-            .projects().project(project)
-            .repos().repository(repository)
+            .projects()
+            .project(project)
+            .repos()
+            .repository(repository)
             .branches();
 
-        Self { client, uri_builder }
+        Self {
+            client,
+            uri_builder,
+        }
     }
 
     pub async fn get_all_branches(&self) -> Result<Vec<Branch>> {
@@ -27,7 +32,8 @@ impl<'client, C> BranchResource<'client, C>
         accumulate_pages(&uri, |uri| {
             let uri = uri.to_owned();
             async move { self.client.get_as(&uri).await }
-        }).await
+        })
+        .await
     }
 
     pub async fn get_default_branch(&self) -> Result<Branch> {

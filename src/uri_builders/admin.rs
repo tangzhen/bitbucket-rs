@@ -1,4 +1,4 @@
-use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, PermissionUriBuilder};
+use crate::uri_builders::{BuildResult, PermissionUriBuilder, ResourceUriBuilder, UriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct AdminUriBuilder<'r> {
@@ -107,7 +107,6 @@ impl<'r> UriBuilder for AdminMailServerUriBuilder<'r> {
         Ok(uri)
     }
 }
-
 
 #[cfg(test)]
 mod tests {

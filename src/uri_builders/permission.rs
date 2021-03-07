@@ -1,11 +1,14 @@
-use crate::uri_builders::{UriBuilder, BuildResult};
+use crate::uri_builders::{BuildResult, UriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct PermissionUriBuilder<B> {
-    builder: B
+    builder: B,
 }
 
-impl<B> PermissionUriBuilder<B> where B: UriBuilder {
+impl<B> PermissionUriBuilder<B>
+where
+    B: UriBuilder,
+{
     pub fn new(builder: B) -> Self {
         Self { builder }
     }
@@ -19,7 +22,10 @@ impl<B> PermissionUriBuilder<B> where B: UriBuilder {
     }
 }
 
-impl<B> UriBuilder for PermissionUriBuilder<B> where B: UriBuilder {
+impl<B> UriBuilder for PermissionUriBuilder<B>
+where
+    B: UriBuilder,
+{
     fn build(&self) -> BuildResult {
         let uri = format!("{}/permissions", self.builder.build()?);
         Ok(uri)
@@ -28,10 +34,13 @@ impl<B> UriBuilder for PermissionUriBuilder<B> where B: UriBuilder {
 
 #[derive(Debug, Clone)]
 pub struct GroupPermissionUriBuilder<B> {
-    builder: PermissionUriBuilder<B>
+    builder: PermissionUriBuilder<B>,
 }
 
-impl<B> GroupPermissionUriBuilder<B> where B: UriBuilder {
+impl<B> GroupPermissionUriBuilder<B>
+where
+    B: UriBuilder,
+{
     pub fn new(builder: PermissionUriBuilder<B>) -> Self {
         Self { builder }
     }
@@ -39,7 +48,10 @@ impl<B> GroupPermissionUriBuilder<B> where B: UriBuilder {
     terminal_resource_fn!(none);
 }
 
-impl<B> UriBuilder for GroupPermissionUriBuilder<B> where B: UriBuilder {
+impl<B> UriBuilder for GroupPermissionUriBuilder<B>
+where
+    B: UriBuilder,
+{
     fn build(&self) -> BuildResult {
         let uri = format!("{}/groups", self.builder.build()?);
         Ok(uri)
@@ -48,10 +60,13 @@ impl<B> UriBuilder for GroupPermissionUriBuilder<B> where B: UriBuilder {
 
 #[derive(Debug, Clone)]
 pub struct UserPermissionUriBuilder<B> {
-    builder: PermissionUriBuilder<B>
+    builder: PermissionUriBuilder<B>,
 }
 
-impl<B> UserPermissionUriBuilder<B> where B: UriBuilder {
+impl<B> UserPermissionUriBuilder<B>
+where
+    B: UriBuilder,
+{
     pub fn new(builder: PermissionUriBuilder<B>) -> Self {
         Self { builder }
     }
@@ -59,7 +74,10 @@ impl<B> UserPermissionUriBuilder<B> where B: UriBuilder {
     terminal_resource_fn!(none);
 }
 
-impl<B> UriBuilder for UserPermissionUriBuilder<B> where B: UriBuilder {
+impl<B> UriBuilder for UserPermissionUriBuilder<B>
+where
+    B: UriBuilder,
+{
     fn build(&self) -> BuildResult {
         let uri = format!("{}/users", self.builder.build()?);
         Ok(uri)

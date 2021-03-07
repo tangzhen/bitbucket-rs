@@ -1,13 +1,7 @@
 use crate::uri_builders::{
-    ResourceUriBuilder,
-    UriBuilder,
-    BuildResult,
-    RepositoryUriBuilder,
-    PermissionUriBuilder,
-    GroupPermissionUriBuilder,
-    UserPermissionUriBuilder,
+    BuildResult, GroupPermissionUriBuilder, PermissionUriBuilder, RepositoryUriBuilder,
+    ResourceUriBuilder, UriBuilder, UserPermissionUriBuilder,
 };
-
 
 #[derive(Debug, Clone)]
 pub struct ProjectUriBuilder<'r> {
@@ -64,7 +58,7 @@ impl<'r> UriBuilder for WithProjectUriBuilder<'r> {
 
 #[derive(Debug, Clone)]
 pub struct ProjectAvatarUriBuilder<'r> {
-    builder: WithProjectUriBuilder<'r>
+    builder: WithProjectUriBuilder<'r>,
 }
 
 impl<'r> ProjectAvatarUriBuilder<'r> {
@@ -117,7 +111,10 @@ pub struct WithProjectPermissionUriBuilder<'r> {
 
 impl<'r> WithProjectPermissionUriBuilder<'r> {
     pub fn new(builder: ProjectPermissionsUriBuilder<'r>, permission: &'r str) -> Self {
-        Self { builder, permission }
+        Self {
+            builder,
+            permission,
+        }
     }
 
     terminal_resource_fn!(all);
@@ -129,7 +126,6 @@ impl<'r> UriBuilder for WithProjectPermissionUriBuilder<'r> {
         Ok(uri)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -149,7 +145,10 @@ mod tests {
 
     #[test]
     fn project_resource_uri_works() {
-        let uri = ResourceUriBuilder::default().host(TEST_HOST).projects().build();
+        let uri = ResourceUriBuilder::default()
+            .host(TEST_HOST)
+            .projects()
+            .build();
         assert_uri!(uri, format!("{}/projects", tests::base_uri()));
     }
 
@@ -191,7 +190,11 @@ mod tests {
 
     #[test]
     fn with_project_permission_all_uri_works() {
-        let uri = builder().permissions().permission("REPO_READ").all().build();
+        let uri = builder()
+            .permissions()
+            .permission("REPO_READ")
+            .all()
+            .build();
         assert_uri!(uri, format!("{}/permissions/REPO_READ/all", base_uri()));
     }
 }

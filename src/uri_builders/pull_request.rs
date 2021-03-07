@@ -1,4 +1,4 @@
-use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, DiffUriBuilder};
+use crate::uri_builders::{BuildResult, DiffUriBuilder, UriBuilder, WithRepositoryUriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct PullRequestUriBuilder<'r> {
@@ -65,7 +65,7 @@ impl<'r> UriBuilder for WithPullRequestUriBuilder<'r> {
 
 #[derive(Debug, Clone)]
 pub struct PullRequestCommentUriBuilder<'r> {
-    builder: WithPullRequestUriBuilder<'r>
+    builder: WithPullRequestUriBuilder<'r>,
 }
 
 impl<'r> PullRequestCommentUriBuilder<'r> {
@@ -93,7 +93,10 @@ pub struct WithPullRequestCommentUriBuilder<'r> {
 
 impl<'r> WithPullRequestCommentUriBuilder<'r> {
     pub fn new(builder: PullRequestCommentUriBuilder<'r>, comment_id: u64) -> Self {
-        Self { builder, comment_id }
+        Self {
+            builder,
+            comment_id,
+        }
     }
 }
 
@@ -106,7 +109,7 @@ impl<'r> UriBuilder for WithPullRequestCommentUriBuilder<'r> {
 
 #[derive(Debug, Clone)]
 pub struct PullRequestTasksUriBuilder<'r> {
-    builder: WithPullRequestUriBuilder<'r>
+    builder: WithPullRequestUriBuilder<'r>,
 }
 
 impl<'r> PullRequestTasksUriBuilder<'r> {
@@ -127,7 +130,7 @@ impl<'r> UriBuilder for PullRequestTasksUriBuilder<'r> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::tests::{TEST_PROJECT, TEST_REPO, TEST_HOST};
+    use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT, TEST_REPO};
     use crate::uri_builders::ResourceUriBuilder;
 
     fn base_uri() -> String {

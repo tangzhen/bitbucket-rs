@@ -1,12 +1,6 @@
 use crate::uri_builders::{
-    WithProjectUriBuilder,
-    UriBuilder,
-    BuildResult,
-    BranchUriBuilder,
-    CommitUriBuilder,
-    PullRequestUriBuilder,
-    DiffUriBuilder,
-    PermissionUriBuilder,
+    BranchUriBuilder, BrowseUriBuilder, BuildResult, CommitUriBuilder, DiffUriBuilder,
+    FileUriBuilder, PermissionUriBuilder, PullRequestUriBuilder, UriBuilder, WithProjectUriBuilder,
 };
 
 #[derive(Debug, Clone)]
@@ -45,9 +39,7 @@ impl<'r> WithRepositoryUriBuilder<'r> {
     terminal_resource_fn!(forks);
     terminal_resource_fn!(recreate);
     terminal_resource_fn!(related);
-    terminal_resource_fn!(browse);      // TODO: separate type
     terminal_resource_fn!(changes);
-    terminal_resource_fn!(files);       // TODO: separate type
     terminal_resource_fn!(tags);
 
     pub fn branches(self) -> BranchUriBuilder<'r> {
@@ -60,6 +52,14 @@ impl<'r> WithRepositoryUriBuilder<'r> {
 
     pub fn diff(self) -> DiffUriBuilder<Self> {
         DiffUriBuilder::new(self)
+    }
+
+    pub fn browse(self) -> BrowseUriBuilder<Self> {
+        BrowseUriBuilder::new(self)
+    }
+
+    pub fn files(self) -> FileUriBuilder<Self> {
+        FileUriBuilder::new(self)
     }
 
     pub fn pull_requests(self) -> PullRequestUriBuilder<'r> {
@@ -84,7 +84,7 @@ impl<'r> UriBuilder for WithRepositoryUriBuilder<'r> {
 
 #[derive(Debug, Clone)]
 pub struct CompareRepositoryUriBuilder<'r> {
-    builder: WithRepositoryUriBuilder<'r>
+    builder: WithRepositoryUriBuilder<'r>,
 }
 
 impl<'r> CompareRepositoryUriBuilder<'r> {
@@ -107,15 +107,18 @@ impl<'r> UriBuilder for CompareRepositoryUriBuilder<'r> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uri_builders::ResourceUriBuilder;
     use crate::uri_builders::tests::{TEST_HOST, TEST_PROJECT, TEST_REPO};
+    use crate::uri_builders::ResourceUriBuilder;
 
     fn base_uri() -> String {
-        format!("{}/projects/{}/repos", crate::uri_builders::tests::base_uri(), TEST_PROJECT)
+        format!(
+            "{}/projects/{}/repos",
+            crate::uri_builders::tests::base_uri(),
+            TEST_PROJECT
+        )
     }
 
     fn builder<'a>() -> WithRepositoryUriBuilder<'a> {

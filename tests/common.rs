@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
 use bitbucket_rs::client::BitbucketClient;
-use httpmock::MockServer;
 use bitbucket_rs::Scheme;
+use httpmock::MockServer;
 
 pub type Result = anyhow::Result<()>;
 
@@ -26,7 +26,11 @@ pub struct TestContext<'c, R> {
 
 impl<'c, R> TestContext<'c, R> {
     pub fn new(server: &'c MockServer, client: &'c BitbucketClient, resource: R) -> Self {
-        Self { server, client, resource }
+        Self {
+            server,
+            client,
+            resource,
+        }
     }
 
     pub fn server(&self) -> &MockServer {
