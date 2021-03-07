@@ -69,14 +69,7 @@ impl<B> UriBuilder for UserPermissionUriBuilder<B> where B: UriBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    struct EmptyUriBuilder;
-
-    impl UriBuilder for EmptyUriBuilder {
-        fn build(&self) -> BuildResult {
-            Ok(String::new())
-        }
-    }
+    use crate::uri_builders::tests::EmptyUriBuilder;
 
     fn builder() -> PermissionUriBuilder<EmptyUriBuilder> {
         PermissionUriBuilder::new(EmptyUriBuilder)

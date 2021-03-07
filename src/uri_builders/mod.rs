@@ -78,7 +78,7 @@ macro_rules! terminal_resource_fn {
 #[cfg(test)]
 #[macro_use]
 mod tests {
-    use crate::uri_builders::REST_API_URI;
+    use crate::uri_builders::{REST_API_URI, UriBuilder, BuildResult};
 
     pub const TEST_HOST: &'static str = "stash.test.com";
     pub const TEST_PROJECT: &'static str = "RRJ";
@@ -86,6 +86,14 @@ mod tests {
 
     pub fn base_uri() -> String {
         format!("http://{}/{}", TEST_HOST, REST_API_URI)
+    }
+
+    pub struct EmptyUriBuilder;
+
+    impl UriBuilder for EmptyUriBuilder {
+        fn build(&self) -> BuildResult {
+            Ok(String::new())
+        }
     }
 
     macro_rules! assert_uri {
@@ -105,6 +113,7 @@ mod commit;
 mod pull_request;
 mod diff;
 mod permission;
+mod path;
 
 pub use resource::*;
 pub use admin::*;
