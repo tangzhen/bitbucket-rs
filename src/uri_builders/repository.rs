@@ -8,7 +8,6 @@ use crate::uri_builders::{
     DiffUriBuilder,
     PermissionUriBuilder,
 };
-use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct RepositoryUriBuilder<'r> {

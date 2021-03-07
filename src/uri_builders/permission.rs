@@ -1,5 +1,4 @@
 use crate::uri_builders::{UriBuilder, BuildResult};
-use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct PermissionUriBuilder<B> {

@@ -7,7 +7,6 @@ use crate::uri_builders::{
     GroupPermissionUriBuilder,
     UserPermissionUriBuilder,
 };
-use function_name::named;
 
 
 #[derive(Debug, Clone)]

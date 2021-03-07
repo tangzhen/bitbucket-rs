@@ -1,5 +1,4 @@
 use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, PermissionUriBuilder};
-use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct AdminUriBuilder<'r> {

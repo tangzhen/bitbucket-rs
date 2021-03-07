@@ -1,5 +1,4 @@
 use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult};
-use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct BranchUriBuilder<'r> {

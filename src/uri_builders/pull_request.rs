@@ -1,5 +1,4 @@
 use crate::uri_builders::{WithRepositoryUriBuilder, UriBuilder, BuildResult, DiffUriBuilder};
-use function_name::named;
 
 #[derive(Debug, Clone)]
 pub struct PullRequestUriBuilder<'r> {
