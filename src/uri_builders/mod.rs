@@ -114,6 +114,8 @@ mod pull_request;
 mod diff;
 mod permission;
 mod path;
+mod browse;
+mod file;
 
 pub use resource::*;
 pub use admin::*;
@@ -124,5 +126,7 @@ pub use commit::*;
 pub use pull_request::*;
 pub use diff::*;
 pub use permission::*;
+pub use browse::*;
+pub use file::*;
 use std::fmt::Formatter;
 use std::error::Error;

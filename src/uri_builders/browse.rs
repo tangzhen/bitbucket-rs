@@ -1,14 +1,14 @@
-use crate::uri_builders::{UriBuilder, BuildResult, TerminalUriBuilder};
 use crate::uri_builders::path::PathUriBuilder;
+use crate::uri_builders::{UriBuilder, TerminalUriBuilder, BuildResult};
 
 #[derive(Debug, Clone)]
-pub struct DiffUriBuilder<B> {
-    builder: PathUriBuilder<'static, B>,
+pub struct BrowseUriBuilder<B> {
+    builder: PathUriBuilder<'static, B>
 }
 
-impl<B> DiffUriBuilder<B> where B: UriBuilder {
+impl<B> BrowseUriBuilder<B> where B: UriBuilder {
     pub fn new(builder: B) -> Self {
-        let builder = PathUriBuilder::new(builder, "diff");
+        let builder = PathUriBuilder::new(builder, "browse");
         Self { builder }
     }
 
@@ -17,7 +17,7 @@ impl<B> DiffUriBuilder<B> where B: UriBuilder {
     }
 }
 
-impl<B> UriBuilder for DiffUriBuilder<B> where B: UriBuilder {
+impl<B> UriBuilder for BrowseUriBuilder<B> where B: UriBuilder {
     fn build(&self) -> BuildResult {
         self.builder.build()
     }
@@ -28,19 +28,19 @@ mod tests {
     use super::*;
     use crate::uri_builders::tests::EmptyUriBuilder;
 
-    fn builder() -> DiffUriBuilder<EmptyUriBuilder> {
-        DiffUriBuilder::new(EmptyUriBuilder)
+    fn builder() -> BrowseUriBuilder<EmptyUriBuilder> {
+        BrowseUriBuilder::new(EmptyUriBuilder)
     }
 
     #[test]
-    fn diff_uri_works() {
+    fn browse_uri_works() {
         let uri = builder().build();
-        assert_uri!(uri, "/diff");
+        assert_uri!(uri, "/browse");
     }
 
     #[test]
-    fn diff_path_uri_works() {
+    fn browse_path_uri_works() {
         let uri = builder().path("home/test").build();
-        assert_uri!(uri, "/diff/home/test");
+        assert_uri!(uri, "/browse/home/test");
     }
 }
