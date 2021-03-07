@@ -1,4 +1,13 @@
-use crate::uri_builders::{WithProjectUriBuilder, UriBuilder, BuildResult, BranchUriBuilder, CommitUriBuilder, PullRequestUriBuilder, DiffUriBuilder, PermissionUriBuilder};
+use crate::uri_builders::{
+    WithProjectUriBuilder,
+    UriBuilder,
+    BuildResult,
+    BranchUriBuilder,
+    CommitUriBuilder,
+    PullRequestUriBuilder,
+    DiffUriBuilder,
+    PermissionUriBuilder,
+};
 use function_name::named;
 
 #[derive(Debug, Clone)]
@@ -39,7 +48,6 @@ impl<'r> WithRepositoryUriBuilder<'r> {
     terminal_resource_fn!(related);
     terminal_resource_fn!(browse);      // TODO: separate type
     terminal_resource_fn!(changes);
-    terminal_resource_fn!(compare);     // TODO: separate type
     terminal_resource_fn!(files);       // TODO: separate type
     terminal_resource_fn!(tags);
 
@@ -62,6 +70,10 @@ impl<'r> WithRepositoryUriBuilder<'r> {
     pub fn permissions(self) -> PermissionUriBuilder<Self> {
         PermissionUriBuilder::new(self)
     }
+
+    pub fn compare(self) -> CompareRepositoryUriBuilder<'r> {
+        CompareRepositoryUriBuilder::new(self)
+    }
 }
 
 impl<'r> UriBuilder for WithRepositoryUriBuilder<'r> {
@@ -70,6 +82,32 @@ impl<'r> UriBuilder for WithRepositoryUriBuilder<'r> {
         Ok(uri)
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct CompareRepositoryUriBuilder<'r> {
+    builder: WithRepositoryUriBuilder<'r>
+}
+
+impl<'r> CompareRepositoryUriBuilder<'r> {
+    pub fn new(builder: WithRepositoryUriBuilder<'r>) -> Self {
+        Self { builder }
+    }
+
+    terminal_resource_fn!(changes);
+    terminal_resource_fn!(commits);
+
+    pub fn diff(self) -> DiffUriBuilder<Self> {
+        DiffUriBuilder::new(self)
+    }
+}
+
+impl<'r> UriBuilder for CompareRepositoryUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/compare", self.builder.build()?);
+        Ok(uri)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -140,5 +178,11 @@ mod tests {
     fn repo_tags_uri_works() {
         let uri = builder().tags().build();
         assert_uri!(uri, format_repo_uri("tags"));
+    }
+
+    #[test]
+    fn repo_compare_uri_works() {
+        let uri = builder().compare().build();
+        assert_uri!(uri, format_repo_uri("compare"));
     }
 }
