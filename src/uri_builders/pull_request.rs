@@ -41,6 +41,10 @@ impl<'r> WithPullRequestUriBuilder<'r> {
         PullRequestCommentUriBuilder::new(self)
     }
 
+    pub fn tasks(self) -> PullRequestTasksUriBuilder<'r> {
+        PullRequestTasksUriBuilder::new(self)
+    }
+
     terminal_resource_fn!(activities);
     terminal_resource_fn!(decline);
     terminal_resource_fn!(merge);
@@ -49,7 +53,6 @@ impl<'r> WithPullRequestUriBuilder<'r> {
     terminal_resource_fn!(changes);
     terminal_resource_fn!(commits);
     terminal_resource_fn!(participants);
-    terminal_resource_fn!(tasks); // TODO: separate type
     terminal_resource_fn!(watch);
 }
 
@@ -97,6 +100,26 @@ impl<'r> WithPullRequestCommentUriBuilder<'r> {
 impl<'r> UriBuilder for WithPullRequestCommentUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.comment_id);
+        Ok(uri)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PullRequestTasksUriBuilder<'r> {
+    builder: WithPullRequestUriBuilder<'r>
+}
+
+impl<'r> PullRequestTasksUriBuilder<'r> {
+    pub fn new(builder: WithPullRequestUriBuilder<'r>) -> Self {
+        Self { builder }
+    }
+
+    terminal_resource_fn!(count);
+}
+
+impl<'r> UriBuilder for PullRequestTasksUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/tasks", self.builder.build()?);
         Ok(uri)
     }
 }
@@ -217,6 +240,12 @@ mod tests {
     fn with_pull_request_tasks_uri_works() {
         let uri = builder().tasks().build();
         assert_uri!(uri, format!("{}/1/tasks", base_uri()));
+    }
+
+    #[test]
+    fn with_pull_request_task_count_uri_works() {
+        let uri = builder().tasks().count().build();
+        assert_uri!(uri, format!("{}/1/tasks/count", base_uri()));
     }
 
     #[test]
