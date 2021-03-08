@@ -1,4 +1,6 @@
-use crate::uri_builders::{AdminUriBuilder, BuildResult, ProjectUriBuilder, UriBuilder, REST_API_URI, UserUriBuilder};
+use crate::uri_builders::{
+    AdminUriBuilder, BuildResult, ProjectUriBuilder, UriBuilder, UserUriBuilder, REST_API_URI,
+};
 use crate::Scheme;
 
 #[derive(Debug, Clone)]

@@ -1,4 +1,4 @@
-use crate::uri_builders::{ResourceUriBuilder, UriBuilder, BuildResult, TerminalUriBuilder};
+use crate::uri_builders::{BuildResult, ResourceUriBuilder, TerminalUriBuilder, UriBuilder};
 
 #[derive(Debug, Clone)]
 pub struct UserUriBuilder<'r> {
