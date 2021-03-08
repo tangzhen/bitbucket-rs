@@ -38,6 +38,8 @@ impl<'r> WithUserUriBuilder<'r> {
     pub fn avatar(self) -> TerminalUriBuilder<Self> {
         TerminalUriBuilder::new(self, "avatar.png".to_string())
     }
+
+    terminal_resource_fn!(settings);
 }
 
 impl<'r> UriBuilder for WithUserUriBuilder<'r> {
@@ -82,5 +84,11 @@ mod tests {
     fn user_avatar_uri_works() {
         let uri = builder().user("george").avatar().build();
         assert_uri!(uri, format!("{}/george/avatar.png", base_uri()));
+    }
+
+    #[test]
+    fn user_settings_uri_works() {
+        let uri = builder().user("george").settings().build();
+        assert_uri!(uri, format!("{}/george/settings", base_uri()));
     }
 }
