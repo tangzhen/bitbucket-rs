@@ -73,6 +73,10 @@ impl<'r> WithRepositoryUriBuilder<'r> {
     pub fn compare(self) -> CompareRepositoryUriBuilder<'r> {
         CompareRepositoryUriBuilder::new(self)
     }
+
+    pub fn settings(self) -> RepositorySettingsUriBuilder<'r> {
+        RepositorySettingsUriBuilder::new(self)
+    }
 }
 
 impl<'r> UriBuilder for WithRepositoryUriBuilder<'r> {
@@ -103,6 +107,72 @@ impl<'r> CompareRepositoryUriBuilder<'r> {
 impl<'r> UriBuilder for CompareRepositoryUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/compare", self.builder.build()?);
+        Ok(uri)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct RepositorySettingsUriBuilder<'r> {
+    builder: WithRepositoryUriBuilder<'r>,
+}
+
+impl<'r> RepositorySettingsUriBuilder<'r> {
+    pub fn new(builder: WithRepositoryUriBuilder<'r>) -> Self {
+        Self { builder }
+    }
+
+    pub fn hooks(self) -> RepoHookSettingsUriBuilder<'r> {
+        RepoHookSettingsUriBuilder::new(self)
+    }
+}
+
+impl<'r> UriBuilder for RepositorySettingsUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/settings", self.builder.build()?);
+        Ok(uri)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct RepoHookSettingsUriBuilder<'r> {
+    builder: RepositorySettingsUriBuilder<'r>,
+}
+
+impl<'r> RepoHookSettingsUriBuilder<'r> {
+    pub fn new(builder: RepositorySettingsUriBuilder<'r>) -> Self {
+        Self { builder }
+    }
+
+    pub fn hook(self, hook: &'r str) -> WithHookUriBuilder<'r> {
+        WithHookUriBuilder::new(self, hook)
+    }
+}
+
+impl<'r> UriBuilder for RepoHookSettingsUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/hooks", self.builder.build()?);
+        Ok(uri)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct WithHookUriBuilder<'r> {
+    builder: RepoHookSettingsUriBuilder<'r>,
+    hook: &'r str,
+}
+
+impl<'r> WithHookUriBuilder<'r> {
+    pub fn new(builder: RepoHookSettingsUriBuilder<'r>, hook: &'r str) -> Self {
+        Self { builder, hook }
+    }
+
+    terminal_resource_fn!(enabled);
+    terminal_resource_fn!(settings);
+}
+
+impl<'r> UriBuilder for WithHookUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/{}", self.builder.build()?, self.hook);
         Ok(uri)
     }
 }
@@ -186,5 +256,35 @@ mod tests {
     fn repo_compare_uri_works() {
         let uri = builder().compare().build();
         assert_uri!(uri, format_repo_uri("compare"));
+    }
+
+    #[test]
+    fn repo_settings_uri_works() {
+        let uri = builder().settings().build();
+        assert_uri!(uri, format_repo_uri("settings"));
+    }
+
+    #[test]
+    fn repo_hook_settings_uri_works() {
+        let uri = builder().settings().hooks().build();
+        assert_uri!(uri, format_repo_uri("settings/hooks"));
+    }
+
+    #[test]
+    fn with_hook_settings_uri_works() {
+        let uri = builder().settings().hooks().hook("test-hook").build();
+        assert_uri!(uri, format_repo_uri("settings/hooks/test-hook"));
+    }
+
+    #[test]
+    fn with_hook_enabled_settings_uri_works() {
+        let uri = builder().settings().hooks().hook("test-hook").enabled().build();
+        assert_uri!(uri, format_repo_uri("settings/hooks/test-hook/enabled"));
+    }
+
+    #[test]
+    fn hook_settings_uri_works() {
+        let uri = builder().settings().hooks().hook("test-hook").settings().build();
+        assert_uri!(uri, format_repo_uri("settings/hooks/test-hook/settings"));
     }
 }
