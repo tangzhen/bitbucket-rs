@@ -278,13 +278,23 @@ mod tests {
 
     #[test]
     fn with_hook_enabled_settings_uri_works() {
-        let uri = builder().settings().hooks().hook("test-hook").enabled().build();
+        let uri = builder()
+            .settings()
+            .hooks()
+            .hook("test-hook")
+            .enabled()
+            .build();
         assert_uri!(uri, format_repo_uri("settings/hooks/test-hook/enabled"));
     }
 
     #[test]
     fn hook_settings_uri_works() {
-        let uri = builder().settings().hooks().hook("test-hook").settings().build();
+        let uri = builder()
+            .settings()
+            .hooks()
+            .hook("test-hook")
+            .settings()
+            .build();
         assert_uri!(uri, format_repo_uri("settings/hooks/test-hook/settings"));
     }
 }
