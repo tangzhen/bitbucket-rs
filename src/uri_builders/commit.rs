@@ -1,4 +1,6 @@
-use crate::uri_builders::{BuildResult, DiffUriBuilder, UriBuilder, WithRepositoryUriBuilder};
+use crate::uri_builders::{
+    BuildResult, DiffUriBuilder, TerminalUriBuilder, UriBuilder, WithRepositoryUriBuilder,
+};
 
 #[derive(Debug, Clone)]
 pub struct CommitUriBuilder<'r> {
@@ -37,14 +39,39 @@ impl<'r> WithCommitUriBuilder<'r> {
         DiffUriBuilder::new(self)
     }
 
+    pub fn comments(self) -> CommitCommentUriBuilder<'r> {
+        CommitCommentUriBuilder::new(self)
+    }
+
     terminal_resource_fn!(changes);
-    terminal_resource_fn!(comments);
     terminal_resource_fn!(watch);
 }
 
 impl<'r> UriBuilder for WithCommitUriBuilder<'r> {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.commit_id);
+        Ok(uri)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CommitCommentUriBuilder<'r> {
+    builder: WithCommitUriBuilder<'r>,
+}
+
+impl<'r> CommitCommentUriBuilder<'r> {
+    pub fn new(builder: WithCommitUriBuilder<'r>) -> Self {
+        Self { builder }
+    }
+
+    pub fn comment(self, comment_id: u64) -> TerminalUriBuilder<Self> {
+        TerminalUriBuilder::new(self, comment_id.to_string())
+    }
+}
+
+impl<'r> UriBuilder for CommitCommentUriBuilder<'r> {
+    fn build(&self) -> BuildResult {
+        let uri = format!("{}/comments", self.builder.build()?);
         Ok(uri)
     }
 }
@@ -109,6 +136,12 @@ mod tests {
     fn commit_comments_works() {
         let uri = builder().comments().build();
         assert_uri!(uri, format!("{}/{}/comments", base_uri(), commit_id()));
+    }
+
+    #[test]
+    fn commit_comment_id_uri_works() {
+        let uri = builder().comments().comment(1).build();
+        assert_uri!(uri, format!("{}/{}/comments/1", base_uri(), commit_id()));
     }
 
     #[test]
