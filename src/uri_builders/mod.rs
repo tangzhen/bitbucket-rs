@@ -50,8 +50,8 @@ pub struct TerminalUriBuilder<B> {
 }
 
 impl<'r, B> TerminalUriBuilder<B>
-where
-    B: UriBuilder,
+    where
+        B: UriBuilder,
 {
     pub fn new(builder: B, resource: String) -> Self {
         Self { builder, resource }
@@ -59,8 +59,8 @@ where
 }
 
 impl<B> UriBuilder for TerminalUriBuilder<B>
-where
-    B: UriBuilder,
+    where
+        B: UriBuilder,
 {
     fn build(&self) -> BuildResult {
         let uri = format!("{}/{}", self.builder.build()?, self.resource);
@@ -118,6 +118,7 @@ mod project;
 mod pull_request;
 mod repository;
 mod resource;
+mod user;
 
 pub use admin::*;
 pub use branch::*;
@@ -130,5 +131,6 @@ pub use project::*;
 pub use pull_request::*;
 pub use repository::*;
 pub use resource::*;
+pub use user::*;
 use std::error::Error;
 use std::fmt::Formatter;
