@@ -1,5 +1,6 @@
 use crate::uri_builders::{
-    AdminUriBuilder, BuildResult, ProjectUriBuilder, UriBuilder, UserUriBuilder, REST_API_URI,
+    AdminUriBuilder, BuildResult, LogUriBuilder, ProjectUriBuilder, UriBuilder, UserUriBuilder,
+    REST_API_URI,
 };
 use crate::Scheme;
 
@@ -39,6 +40,10 @@ impl<'r> ResourceUriBuilder<'r> {
 
     pub fn users(self) -> UserUriBuilder<'r> {
         UserUriBuilder::new(self)
+    }
+
+    pub fn logs(self) -> LogUriBuilder<'r> {
+        LogUriBuilder::new(self)
     }
 }
 
