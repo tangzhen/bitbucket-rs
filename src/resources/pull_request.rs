@@ -1,4 +1,5 @@
 use crate::models::get::{PullRequest, PullRequestState};
+use crate::models::post;
 use crate::resources::util::accumulate_pages;
 use crate::traits::AsyncRestClient;
 use crate::uri_builders::{PullRequestUriBuilder, ResourceUriBuilder, UriBuilder};
@@ -64,5 +65,13 @@ where
     pub async fn get_pull_request(&self, id: u64) -> Result<PullRequest> {
         let uri = self.uri_builder.clone().pull_request(id).build()?;
         self.client.get_as(&uri).await
+    }
+
+    pub async fn create_pull_request(
+        &self,
+        pull_request: &post::PullRequest,
+    ) -> Result<PullRequest> {
+        let uri = self.uri_builder.build()?;
+        self.client.post(&uri, Some(pull_request)).await
     }
 }

@@ -66,9 +66,15 @@ mod tests {
             crate::common::TestContext::new(server, client, resource)
         }};
 
-        ($resource_type:tt, $($args:expr)*) => {{
+        ($resource_type:tt, $($project:expr)*) => {{
             __context!(server, client);
-            let resource = <bitbucket_rs::resources::$resource_type<_>>::new(client, $($args)*);
+            let resource = <bitbucket_rs::resources::$resource_type<_>>::new(client, $($project)*);
+            crate::common::TestContext::new(server, client, resource)
+        }};
+
+        ($resource_type:tt, $($project:expr)*, $($repo:expr)*) => {{
+            __context!(server, client);
+            let resource = <bitbucket_rs::resources::$resource_type<_>>::new(client, $($project)*, $($repo)*);
             crate::common::TestContext::new(server, client, resource)
         }};
     }

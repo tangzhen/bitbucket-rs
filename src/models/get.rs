@@ -200,9 +200,9 @@ pub struct PullRequest {
     pub title: String,
     pub description: Option<String>,
     // TODO: Make this an enum an deserialize manually
-    pub state: String,
-    pub open: bool,
-    pub closed: bool,
+    pub state: Option<String>,
+    pub open: Option<bool>,
+    pub closed: Option<bool>,
     #[serde(rename(deserialize = "createdDate"))]
     pub date_created: u64,
     #[serde(rename(deserialize = "updatedDate"))]
@@ -211,8 +211,8 @@ pub struct PullRequest {
     pub from_ref: PullRequestRef,
     #[serde(rename(deserialize = "toRef"))]
     pub to_ref: PullRequestRef,
-    pub locked: bool,
-    pub author: PullRequestMember,
+    pub locked: Option<bool>,
+    pub author: Option<PullRequestMember>,
     pub reviewers: Vec<PullRequestMember>,
     pub participants: Vec<PullRequestMember>,
     pub link: Option<Link>,
