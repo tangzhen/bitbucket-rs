@@ -71,7 +71,7 @@ where
 macro_rules! terminal_resource_fn {
     ($fn_name:ident) => {
         pub fn $fn_name(self) -> crate::uri_builders::TerminalUriBuilder<Self> {
-            let function_name = heck::KebabCase::to_kebab_case(std::stringify!($fn_name));
+            let function_name = heck::AsKebabCase(std::stringify!($fn_name)).to_string();
             crate::uri_builders::TerminalUriBuilder::new(self, function_name)
         }
     };
