@@ -71,7 +71,10 @@ impl BitbucketClient {
     #[inline]
     fn maybe_add_auth(&self, builder: RequestBuilder) -> RequestBuilder {
         if let Some(ref auth) = self.auth {
-            builder.basic_auth(auth.username(), Some(auth.password()))
+            match auth {
+                Authorization::Basic(username, password) => builder.basic_auth(username, Some(password)),
+                Authorization::Bear(bear) => builder.bearer_auth(bear)
+            }
         } else {
             builder
         }
