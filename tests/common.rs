@@ -3,6 +3,7 @@
 use bitbucket_rs::client::BitbucketClient;
 use bitbucket_rs::Scheme;
 use httpmock::MockServer;
+use bitbucket_rs::auth::Authorization;
 
 pub type Result = anyhow::Result<()>;
 
@@ -11,7 +12,7 @@ pub const CONTENT_TYPE_JSON: &'static str = "application/json; charset=UTF-8";
 pub const REST_PATH_PREFIX: &'static str = "/rest/api/1.0";
 
 pub fn make_client(server: &MockServer) -> BitbucketClient {
-    BitbucketClient::new(&server.address().to_string(), Scheme::HTTP)
+    BitbucketClient::with_auth(&server.address().to_string(), Scheme::HTTP, Authorization::Bear("token".to_owned()))
 }
 
 pub fn format_path(path: &str) -> String {
