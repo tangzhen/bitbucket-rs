@@ -35,9 +35,9 @@ pub struct PullRequestRef {
 pub struct PullRequest {
     pub title: String,
     pub description: Option<String>,
-    #[serde(rename(deserialize = "fromRef"))]
+    #[serde(rename(serialize = "fromRef"))]
     pub from_ref: PullRequestRef,
-    #[serde(rename(deserialize = "toRef"))]
+    #[serde(rename(serialize = "toRef"))]
     pub to_ref: PullRequestRef,
     pub close_source_branch: bool,
     pub reviewers: Vec<User>,
