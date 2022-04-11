@@ -9,6 +9,11 @@ pub struct Project {
 }
 
 #[derive(Debug, Serialize, Eq, PartialEq)]
+pub struct PullRequestMember {
+    pub user: User,
+}
+
+#[derive(Debug, Serialize, Eq, PartialEq)]
 pub struct User {
     pub name: String,
 }
@@ -40,5 +45,5 @@ pub struct PullRequest {
     #[serde(rename(serialize = "toRef"))]
     pub to_ref: PullRequestRef,
     pub close_source_branch: bool,
-    pub reviewers: Vec<User>,
+    pub reviewers: Vec<PullRequestMember>,
 }
